@@ -1,0 +1,3 @@
+desc=JRI Publisher
+os_support=*-linux freebsd archlinux
+category=servers
