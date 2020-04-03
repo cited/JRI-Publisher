@@ -2,7 +2,7 @@
 # JRI Pre-Install Script for CentOS and Ubuntu
 # For use on clean CentOS or Ubuntu box only
 # Usage:
-# wget https://raw.githubusercontent.com/cited/jri-publisher/master/scripts/pre-installer.sh
+# wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/pre-install.sh
 # chmod +x pre-installer
 # ./pre-installer.sh
 
