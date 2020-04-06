@@ -43,3 +43,4 @@ May need to install x11 fonts when using OpenJDK
 
 # Links
 - [JasperReportsIntegration](http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/2.4.0/Index.html)
+- [JasperReportsIntegration Forum](https://gitq.com/daust/JasperReportsIntegration)
