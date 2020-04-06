@@ -41,7 +41,7 @@ EOF
 
 function download_jri_publisher_module(){
 pushd /tmp/
-	wget https://github.com/cited/jri-publisher/archive/master.zip
+	wget https://github.com/DavidGhedini/jri-publisher/archive/master.zip
 	unzip master.zip
 	mv jri-publisher-master jri_publisher
 	tar -czf /opt/jri_publisher.wbm.gz jri_publisher
@@ -83,7 +83,7 @@ popd
 function install_certbot_module(){
 pushd /opt/
 	if [ "${REPO}" == 'apt' ]; then
-	/usr/libexec/webmin/install-module.pl certbot.wbm.gz
+	/usr/share/webmin/install-module.pl certbot.wbm.gz
         elif [ "${REPO}" == 'rpm' ]; then
         /usr/share/webmin/install-module.pl certbot.wbm.gz
         fi
