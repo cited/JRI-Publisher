@@ -13,6 +13,8 @@ It also provides Publishing, Scheduling, and Report Management.
 
 It can be used with or without Oracle APEX.
 
+[![Documentation Status](https://readthedocs.org/projects/jri-publisher/badge/?version=latest)](https://jripub.davidghedini.com/en/latest/?badge=latest)
+
 
 # Operating Systems
 CentOS 7<br>
