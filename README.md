@@ -23,7 +23,7 @@ Ubuntu 18 LTS
 # Install via Script:
 
       wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/pre-install.sh
-      chmod + x pre-install.sh
+      chmod +x pre-install.sh
       ./pre-install.sh
 
 
