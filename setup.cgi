@@ -401,6 +401,11 @@ sub get_jasper_archive_url{
 sub update_oc_jasper_config_home(){
 	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
 
+	if(! -f $webxml){
+		print "Error: $webxml not found. Update oc.jasper.config.home manually\n";
+		return;
+	}
+
 	my $lref = &read_file_lines($webxml);
 	my $lnum = 0;
 
@@ -459,12 +464,11 @@ sub install_jasper_reports(){
 	$tmpfile = &transname('script.sh');
 	open(my $fh, '>', $tmpfile) or die "open:$!";
 	print $fh "cd $unzip_dir/bin\n";
-	print $fh "chmod +x encryptPasswords.sh setConfigDir.sh\n";
+	print $fh "chmod +x encryptPasswords.sh\n";
 	#print $fh "sh ./encryptPasswords.sh ${$jasper_home}/conf/application.properties\n";
 	if(-f $unzip_dir.'/bin/setConfigDir.sh'){
+		print $fh "chmod +x setConfigDir.sh\n";
 		print $fh "sh ./setConfigDir.sh $catalina_home/webapps/JasperReportsIntegration.war $jasper_home\n";
-	}else{
-		update_oc_jasper_config_home();
 	}
 	print $fh "chown -R tomcat:tomcat ${jasper_home}\n";
 	close $fh;
@@ -681,6 +685,8 @@ sub setup_cleanup{
 			#}
 	}
 	&apache::restart_apache();
+
+	update_oc_jasper_config_home();
 
 	print &js_redirect("index.cgi");
 }
