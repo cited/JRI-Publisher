@@ -416,6 +416,14 @@ sub install_jasper_reports(){
 
 	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release, $jr_site);
 	my $tmpfile = download_file($jr_archive_url);
+	my $unzip_dir = unzip_me($tmpfile);
+
+	#github releases are in a subfolder
+	my $subdir = substr(file_basename($tmpfile), 0, -4);	#take filename, and drop .zip
+	if(-d $unzip_dir.'/'.$subdir){
+		$unzip_dir = $unzip_dir.'/'.$subdir;
+	}
+
 	print "Installing JasperReportsIntegration.war</br>";
 	&rename_file($unzip_dir.'/webapp/JasperReportsIntegration.war', $catalina_home.'/webapps/');
 
