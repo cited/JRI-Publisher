@@ -247,13 +247,13 @@ EOF
 		$beta_enabled = 1;
 	}
 
-	my @jr_vers = sort sort_version_des &get_jasper_reports_versions($beta_enabled);
+	my %jr_vers = &get_jasper_reports_versions($beta_enabled);
 	my @jr_opts = ( );
-	foreach my $v (@jr_vers) {
+	foreach my $v (sort sort_version_des keys %jr_vers) {
 		if($v =~ /([0-9\-\.a-z]+) BETA$/){
-			push(@jr_opts, [ $v, $1 ]);	#drop BETA from version label
+			push(@jr_opts, [ $jr_vers{$v}, $1 ]);	#drop BETA from version label
 		}else{
-			push(@jr_opts, [ $v, $v ]);
+			push(@jr_opts, [ $jr_vers{$v}, $v ]);
 		}
 	}
 
@@ -311,38 +311,68 @@ EOF
 
 sub parse_jr_versions{
 	my $base_url = $_[0];
-	my @latest_versions;
+	my %latest_versions;
 	my $tmpfile = download_file($base_url);
 	if(! $tmpfile){
-		return '2.4.0';
+		return %latest_versions;
 	}
 
-	my @latest_versions;
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
 		if($line =~ /<a\s+href="([0-9\.]+(\-beta)?)\/">[0-9\.]+(\-beta)?\/<\/a>/){
-			push(@latest_versions, $1);
+			$latest_versions{$1} = $1.'@download';
 		}
 	}
 	close $fh;
-	return @latest_versions;
+	return %latest_versions;
+}
+
+sub parse_jr_gh_versions{
+	my $base_url = $_[0];
+	my %latest_versions;
+	my $tmpfile = download_file($base_url);
+	if(! $tmpfile){
+		return %latest_versions;
+	}
+
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/JasperReportsIntegration\-[0-9\.\-]+\.zip)/){
+			$latest_versions{$2} = $2.'@'.$1;
+		}
+	}
+	close $fh;
+	return %latest_versions;
 }
 
 sub get_jasper_reports_versions(){
 	my $beta_enabled = $_[0];
-	my @jr_versions 	= parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/');
+	my %jr_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/');
+	my %gh_versions = parse_jr_gh_versions('https://github.com/daust/JasperReportsIntegration/releases');
+
+	foreach my $v (keys %gh_versions){
+		$jr_versions{$v} = $gh_versions{$v};
+	}
+
 	if($beta_enabled){
-		my @beta_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/Beta-releases/');
-		foreach my $v (@beta_versions){
-			push(@jr_versions, $v." BETA");
+		my %beta_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/Beta-releases/');
+		foreach my $v (keys %beta_versions){
+			$jr_versions{$v." BETA"} = $beta_versions{$v};
 		}
 	}
-	return @jr_versions;
+	return %jr_versions;
 }
 
 sub get_jasper_archive_url{
 	my $jr_ver = $_[0];
 	my $beta_release = $_[1];
+	my $jr_site = $_[2];
+
+	#if our version is from github
+	if($jr_site =~ /\/daust\/JasperReportsIntegration\//){
+		return 'https://github.com'.$jr_site;
+	}
+
 	my $zip_ver = "${jr_ver}.0";
 	my $base_url = 'http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration';
 
@@ -369,7 +399,10 @@ sub get_jasper_archive_url{
 
 sub install_jasper_reports(){
 	#get Jasper version
-	my $jr_ver = $in{'jr_ver'};
+	my @jr_ver_site = split(/@/, $in{'jr_ver'});
+	my $jr_ver = $jr_ver_site[0];
+	my $jr_site = $jr_ver_site[1];
+
 	my $catalina_home = get_catalina_home();
 	my $jasper_home = $catalina_home.'/jasper_reports';
 
@@ -381,9 +414,8 @@ sub install_jasper_reports(){
 
 	print "<p>Installing Jasper Reports $jr_ver</p>";
 
-	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release);
+	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release, $jr_site);
 	my $tmpfile = download_file($jr_archive_url);
-	my $unzip_dir = unzip_me($tmpfile);
 	print "Installing JasperReportsIntegration.war</br>";
 	&rename_file($unzip_dir.'/webapp/JasperReportsIntegration.war', $catalina_home.'/webapps/');
 
