@@ -501,11 +501,51 @@ sub check_jdbc_pg_exists(){
 }
 
 sub jri_ctx_add_pg(){
-	#TODO:
+	my $ctxxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/context.xml';
+	open(my $fh, '>', $ctxxml) or die "open:$!";
+	print $fh <<EOF;
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Context path="/JasperReportsIntegration" debug="5" reloadable="true" crossContext="true">
+	<Resource name="jdbc/postgre" auth="Container" type="javax.sql.DataSource"
+     driverClassName="org.postgresql.Driver"
+     maxActive="20" initialSize="0" minIdle="0" maxIdle="8"
+     maxWait="10000" timeBetweenEvictionRunsMillis="30000"
+     minEvictableIdleTimeMillis="60000" testWhileIdle="true"
+     validationQuery="select user" maxAge="600000"
+     rollbackOnReturn="true"
+     url="jdbc:postgresql://localhost:5432/db1"
+     username="xxx"
+     password="xxx"
+     />
+</Context>
+EOF
+	close $fh;
+	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
 }
 
 sub jri_web_add_pg(){
-	#TODO:
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	my $ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>postgreSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/postgres</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/web-app>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
 }
 
 sub install_jri_pg(){
