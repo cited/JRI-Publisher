@@ -13,7 +13,8 @@ my $catalina_home = get_catalina_home();
 			"$catalina_home/conf/server.xml",
 			"$catalina_home/conf/tomcat-users.xml",
 			"$catalina_home/conf/web.xml",
-			"$catalina_home/jasper_reports/conf/application.properties",
+			"$catalina_home/jasper_reports/conf/application.properties"
+			"$catalina_home/webapps/JasperReportsIntegration/WEB-INF/web.xml",
 			$in{'file'});
 $in{'file'} ||= $files[0];
 #&indexof($in{'file'}, @files) >= 0 || &error($text{'manual_efile'});
