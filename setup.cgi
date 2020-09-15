@@ -397,6 +397,23 @@ sub get_jasper_archive_url{
 	return "${base_url}/${jr_ver}/JasperReportsIntegration-${zip_ver}.zip";
 }
 
+#set the oc.jasper.config.home manually
+sub update_oc_jasper_config_home(){
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^[ \t]+<param\-name>oc\.jasper\.config\.home</){
+			@{$lref}[$lnum+1] = '<param-value>'.get_catalina_home().'/jasper_reports</param-value>';
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+}
+
 sub install_jasper_reports(){
 	#get Jasper version
 	my @jr_ver_site = split(/@/, $in{'jr_ver'});
@@ -444,7 +461,11 @@ sub install_jasper_reports(){
 	print $fh "cd $unzip_dir/bin\n";
 	print $fh "chmod +x encryptPasswords.sh setConfigDir.sh\n";
 	#print $fh "sh ./encryptPasswords.sh ${$jasper_home}/conf/application.properties\n";
-	print $fh "sh ./setConfigDir.sh $catalina_home/webapps/JasperReportsIntegration.war $jasper_home\n";
+	if(-f $unzip_dir.'/bin/setConfigDir.sh'){
+		print $fh "sh ./setConfigDir.sh $catalina_home/webapps/JasperReportsIntegration.war $jasper_home\n";
+	}else{
+		update_oc_jasper_config_home();
+	}
 	print $fh "chown -R tomcat:tomcat ${jasper_home}\n";
 	close $fh;
 	exec_cmd('bash '.$tmpfile);
