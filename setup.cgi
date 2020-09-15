@@ -455,6 +455,64 @@ sub install_gen_jri_report(){
 	print 'Installed in /usr/local/bin/gen_jri_report.sh';
 }
 
+sub check_jdbc_pg_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^postgresql\-[0-9\.]+\.jar$/       # pg jar
+      			&& -f "$catalina_home/lib/$_"  # and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
+sub jri_ctx_add_pg(){
+	#TODO:
+}
+
+sub jri_web_add_pg(){
+	#TODO:
+}
+
+sub install_jri_pg(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC PG page');
+	}
+
+	#find latest
+	$jdbc_pg_ver = '';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<a\s+href="download\/postgresql\-([0-9\.]+)\.jar/){
+			$jdbc_pg_ver = $1;
+			last;
+		}
+	}
+	close $fh;
+
+	print "Downloading JDBC PG ver. ".$jdbc_pg_ver."</br>";
+	$tmpfile = download_file('https://jdbc.postgresql.org/download/postgresql-'.$jdbc_pg_ver.'.jar');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC PG jar');
+	}
+
+	my $jar_filepath = get_catalina_home().'/lib/'.file_basename($tmpfile);
+	&rename_file($tmpfile, $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	jri_ctx_add_pg();
+	jri_web_add_pg();
+
+	print "Done</br>";
+}
+
 sub setup_checks{
 
 	#Check for commands
@@ -524,6 +582,11 @@ sub setup_checks{
 			print "<p>JasperReportsIntegration is not installed. To select version and install, ".
 					"<a href='./setup.cgi?mode=select_jasper_version&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
+
+		if(! -f check_jdbc_pg_exists()){
+			print "<p>JRI PG support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_pg&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
 	}
 
 	if(! -f '/usr/local/bin/gen_jri_report.sh'){
@@ -576,6 +639,8 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "setup_apache_proxy"){			setup_default_apache_proxy();
 }elsif($mode eq "install_jasper_reports"){	install_jasper_reports();
 }elsif($mode eq "install_gen_jri_report"){	install_gen_jri_report();
+}elsif($mode eq "install_jri_pg"){	install_jri_pg();
+
 }else{
 	print "Error: Invalid setup mode\n";
 }
