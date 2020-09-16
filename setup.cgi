@@ -531,7 +531,7 @@ EOF
 }
 
 sub jri_web_add_pg(){
-	my $webxml = get_catalina_home().'/conf/Catalina/localhost/JasperReportsIntegration.xml';
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
 
 	my $lref = &read_file_lines($webxml);
 	my $lnum = 0;
