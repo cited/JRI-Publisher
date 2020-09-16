@@ -555,7 +555,7 @@ sub jri_web_add_pg(){
 }
 
 sub jri_add_datasource(){
-	open(my $fh, '<', get_catalina_home().'/jasper_reports/conf/application.properties') or die "open:$!";
+	open(my $fh, '>>', get_catalina_home().'/jasper_reports/conf/application.properties') or die "open:$!";
 	print $fh "[datasource:postgres]\n";
 	print $fh "type=jndi\n";
 	print $fh "name=postgres\n";
