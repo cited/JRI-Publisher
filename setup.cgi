@@ -554,6 +554,14 @@ sub jri_web_add_pg(){
 	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
 }
 
+sub jri_add_datasource(){
+	open(my $fh, '<', get_catalina_home().'/jasper_reports/conf/application.properties') or die "open:$!";
+	print $fh "[datasource:postgres]\n";
+	print $fh "type=jndi\n";
+	print $fh "name=postgres\n";
+	close $fh
+}
+
 sub install_jri_pg(){
 	#download JDBC versions page
 	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
@@ -584,6 +592,7 @@ sub install_jri_pg(){
 
 	jri_ctx_add_pg();
 	jri_web_add_pg();
+	jri_add_datasource();
 
 	print "Done</br>";
 }
