@@ -513,10 +513,10 @@ sub jri_ctx_add_pg(){
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Context path="/JasperReportsIntegration" debug="5" reloadable="true" crossContext="true">
-	<Resource name="jdbc/postgre" auth="Container" type="javax.sql.DataSource"
+	<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"
      driverClassName="org.postgresql.Driver"
-     maxActive="20" initialSize="0" minIdle="0" maxIdle="8"
-     maxWait="10000" timeBetweenEvictionRunsMillis="30000"
+     maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"
+     maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"
      minEvictableIdleTimeMillis="60000" testWhileIdle="true"
      validationQuery="select user" maxAge="600000"
      rollbackOnReturn="true"
