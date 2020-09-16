@@ -479,6 +479,8 @@ sub install_jasper_reports(){
 	print $fh "\nOC_JASPER_CONFIG_HOME=\"${jasper_home}\"";
 	close $fh;
 
+	tomcat_service_ctl('restart');
+
 	print "Done</br>";
 }
 
