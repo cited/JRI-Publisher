@@ -532,7 +532,7 @@ sub jri_add_datasource{
 	close $fh
 }
 
-sub ctx_xml_add(){
+sub ctx_xml_add{
 	my $ref_str = $_[0];
 
 	my $ctxxml = get_catalina_home().'/conf/context.xml';
@@ -550,7 +550,7 @@ sub ctx_xml_add(){
 	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
 }
 
-sub web_xml_add(){
+sub web_xml_add{
 	my $ref_str = $_[0];
 	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
 
