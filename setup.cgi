@@ -507,26 +507,30 @@ sub check_jdbc_pg_exists(){
 }
 
 sub jri_ctx_add_pg(){
-	my $ctxxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/context.xml';
-	open(my $fh, '>', $ctxxml) or die "open:$!";
-	print $fh <<EOF;
-<?xml version="1.0" encoding="UTF-8"?>
+	my $ref_str = '<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"'."\n";
+  $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
+  $ref_str .= 'maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"'."\n";
+  $ref_str .= 'maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"'."\n";
+	$ref_str .= 'minEvictableIdleTimeMillis="60000" testWhileIdle="true"'."\n";
+	$ref_str .= 'validationQuery="select user" maxAge="600000"'."\n";
+	$ref_str .= 'rollbackOnReturn="true"'."\n";
+	$ref_str .= 'url="jdbc:postgresql://localhost:5432/db1"'."\n";
+	$ref_str .= 'username="xxx"'."\n";
+	$ref_str .= 'password="xxx"'."\n";
+	$ref_str .= '/>'."\n";
 
-<Context path="/JasperReportsIntegration" debug="5" reloadable="true" crossContext="true">
-	<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"
-     driverClassName="org.postgresql.Driver"
-     maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"
-     maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"
-     minEvictableIdleTimeMillis="60000" testWhileIdle="true"
-     validationQuery="select user" maxAge="600000"
-     rollbackOnReturn="true"
-     url="jdbc:postgresql://localhost:5432/db1"
-     username="xxx"
-     password="xxx"
-     />
-</Context>
-EOF
-	close $fh;
+	my $ctxxml = get_catalina_home().'/conf/context.xml';
+	my $lref = &read_file_lines($ctxxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/Context>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($ctxxml);
 	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
 }
 
