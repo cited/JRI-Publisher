@@ -506,6 +506,22 @@ sub check_jdbc_pg_exists(){
 	}
 }
 
+sub check_jdbc_mysql_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^mysql-connector-java\-[0-9\.]+\.jar$/       # pg jar
+      			&& -f "$catalina_home/lib/$_"  # and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
 sub jri_ctx_add_pg(){
 	my $ref_str = '<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"'."\n";
   $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
@@ -566,6 +582,14 @@ sub jri_add_datasource(){
 	close $fh
 }
 
+sub jri_add_datasource_mysql(){
+	open(my $fh, '>>', get_catalina_home().'/jasper_reports/conf/application.properties') or die "open:$!";
+	print $fh "[datasource:MySQL]\n";
+	print $fh "type=jndi\n";
+	print $fh "name=MySQL\n";
+	close $fh
+}
+
 sub install_jri_pg(){
 	#download JDBC versions page
 	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
@@ -597,6 +621,92 @@ sub install_jri_pg(){
 	jri_ctx_add_pg();
 	jri_web_add_pg();
 	jri_add_datasource();
+
+	print "Done</br>";
+}
+
+sub jri_ctx_add_mysql(){
+	my $ref_str = '<Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.mysql.jdbc.Driver"'."\n";
+	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:mysql://localhost:3306/xxx"/>'."\n";
+
+	my $ctxxml = get_catalina_home().'/conf/context.xml';
+	my $lref = &read_file_lines($ctxxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/Context>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($ctxxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
+}
+
+sub jri_web_add_mysql(){
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	my $ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MySQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/MySQL</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/web-app>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
+}
+
+sub install_jri_mysql(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL page');
+	}
+
+	#find latest
+	$jdbc_mysql_ver = '';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<h1>Connector\/J[ \t]+([0-9\.]+)[ \t]/){
+			$jdbc_mysql_ver = $1;
+			last;
+		}
+	}
+	close $fh;
+
+	if(!$jdbc_mysql_ver){
+		die('Error: Failed to parse JDBC MySQL version');
+	}
+
+	print "Downloading JDBC MySQL ver. ".$jdbc_mysql_ver."</br>";
+	$tmpfile = download_file('https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-'.$jdbc_mysql_ver.'.zip');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL zip');
+	}
+
+	my $unzip_dir = unzip_me($tmpfile);
+
+	my $jar_filepath = get_catalina_home().'/lib/mysql-connector-java-'.$jdbc_mysql_ver.'.jar';
+	&rename_file($unzip_dir.'/mysql-connector-java-'.$jdbc_mysql_ver.'/mysql-connector-java-'.$jdbc_mysql_ver.'.jar', $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	jri_ctx_add_mysql();
+	jri_web_add_mysql();
+	jri_add_datasource_mysql();
 
 	print "Done</br>";
 }
@@ -675,6 +785,11 @@ sub setup_checks{
 			print "<p>JRI PG support is not installed. To install it ".
 					"<a href='./setup.cgi?mode=install_jri_pg&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
+
+		if(! -f check_jdbc_mysql_exists()){
+			print "<p>JRI MySQL support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_mysql&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
 	}
 
 	if(! -f '/usr/local/bin/gen_jri_report.sh'){
@@ -729,8 +844,8 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "setup_apache_proxy"){			setup_default_apache_proxy();
 }elsif($mode eq "install_jasper_reports"){	install_jasper_reports();
 }elsif($mode eq "install_gen_jri_report"){	install_gen_jri_report();
-}elsif($mode eq "install_jri_pg"){	install_jri_pg();
-
+}elsif($mode eq "install_jri_pg"){		install_jri_pg();
+}elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
 }else{
 	print "Error: Invalid setup mode\n";
 }
