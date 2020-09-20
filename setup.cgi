@@ -522,6 +522,22 @@ sub check_jdbc_mysql_exists(){
 	}
 }
 
+sub check_jdbc_mssql_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^mssql-jdbc\-[0-9\.]+\.jre[0-9]+\.jar$/   # mssql jar
+      			&& -f "$catalina_home/lib/$_"  									# and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
 sub jri_add_datasource{
 	my $ds = $_[0];
 	my $ds_name = $_[1];
@@ -676,6 +692,77 @@ sub install_jri_mysql(){
 	print "Done</br>";
 }
 
+sub install_jri_mssql(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL page');
+	}
+
+	#find latest
+	$jdbc_mssql_ver = '';
+	$jdbc_mssql_url = 'https://go.microsoft.com/fwlink/?linkid=2137600';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /Download Microsoft JDBC Driver ([0-9\.]+)/){
+			$jdbc_mssql_ver = $1;
+
+			if($line =~ /"(https:\/\/go\.microsoft\.com\/fwlink\/?linkid=[0-9]+)"/){
+				$jdbc_mssql_url = $1;
+				last;
+			}
+		}
+	}
+	close $fh;
+
+	if(!$jdbc_mssql_url){
+		die('Error: Failed to parse JDBC MySQL version');
+	}
+
+	print "Downloading JDBC MySQL ver. ".$jdbc_mssql_ver."</br>";
+	$tmpfile = download_file($jdbc_mssql_url);
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL zip');
+	}
+
+	my $unzip_dir = unzip_me($tmpfile);
+
+	#find which java we have
+	my %jv = get_java_version();
+
+	my $sqljdbc_dir = $unzip_dir.'sqljdbc_'.$jdbc_mssql_ver.'\enu/';
+  opendir(DIR, $sqljdbc_dir) or die $!;
+  my @jars = grep { /^mssql\-jdbc\-[0-9]+\.jre$jv{'major'}\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
+  closedir(DIR);
+
+	if(!@jars){
+		die('Error: Failed to get JDBC MySQL jar for JDK '.$jv{'major'});
+	}
+
+	my $jar_filepath = get_catalina_home().'/lib/'.$jars[0];
+	&rename_file($sqljdbc_dir.'/'.$jars[0], $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	my $ref_str = '<Resource name="jdbc/MSSQL" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"'."\n";
+	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:sqlserver://localhost:1433;databaseName=xxx"/>'."\n";
+	ctx_xml_add($ref_str);
+
+	$ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MSSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/MSSQL</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	web_xml_add($ref_str);
+
+	jri_add_datasource('MSSQL', 'MSSQL');
+
+	print "Done</br>";
+}
+
 sub setup_checks{
 
 	#Check for commands
@@ -755,6 +842,11 @@ sub setup_checks{
 			print "<p>JRI MySQL support is not installed. To install it ".
 					"<a href='./setup.cgi?mode=install_jri_mysql&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
+
+		if(! -f check_jdbc_mssql_exists()){
+			print "<p>JRI MSSQL support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_mssql&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
 	}
 
 	if(! -f '/usr/local/bin/gen_jri_report.sh'){
@@ -811,6 +903,7 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "install_gen_jri_report"){	install_gen_jri_report();
 }elsif($mode eq "install_jri_pg"){		install_jri_pg();
 }elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
+}elsif($mode eq "install_jri_mssql"){	install_jri_mssql();
 }else{
 	print "Error: Invalid setup mode\n";
 }
