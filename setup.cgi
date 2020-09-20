@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 require './tomcat-lib.pl';
+require 'java-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
 foreign_require('software', 'software-lib.pl');
 foreign_require('apache', 'apache-lib.pl');
@@ -729,10 +730,11 @@ sub install_jri_mssql(){
 
 	#find which java we have
 	my %jv = get_java_version();
+	my $jdk_major = $jv{'major'};
 
-	my $sqljdbc_dir = $unzip_dir.'sqljdbc_'.$jdbc_mssql_ver.'\enu/';
+	my $sqljdbc_dir = $unzip_dir.'/sqljdbc_'.$jdbc_mssql_ver.'\\enu/';
   opendir(DIR, $sqljdbc_dir) or die $!;
-  my @jars = grep { /^mssql\-jdbc\-[0-9]+\.jre$jv{'major'}\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
+  my @jars = grep { /^mssql\-jdbc\-[0-9\.]+\.jre$jdk_major\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
   closedir(DIR);
 
 	if(!@jars){
