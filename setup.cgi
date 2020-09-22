@@ -620,7 +620,7 @@ sub install_jri_pg(){
 	$ref_str .= 'minEvictableIdleTimeMillis="60000" testWhileIdle="true"'."\n";
 	$ref_str .= 'validationQuery="select user" maxAge="600000"'."\n";
 	$ref_str .= 'rollbackOnReturn="true"'."\n";
-	$ref_str .= 'url="jdbc:postgresql://localhost:5432/db1"'."\n";
+	$ref_str .= 'url="jdbc:postgresql://localhost:5432/xxx"'."\n";
 	$ref_str .= 'username="xxx"'."\n";
 	$ref_str .= 'password="xxx"'."\n";
 	$ref_str .= '/>'."\n";
