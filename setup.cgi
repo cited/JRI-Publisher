@@ -338,7 +338,7 @@ sub parse_jr_gh_versions{
 
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
-		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/JasperReportsIntegration\-[0-9\.\-]+\.zip)/){
+		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/[^\-]*\-[0-9\.\-]+\.zip)/){
 			$latest_versions{$2} = $2.'@'.$1;
 		}
 	}
