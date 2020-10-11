@@ -205,7 +205,7 @@ sub unzip_me{
 	my @suffixlist = ('\.zip');
 	($file_name,$path,$lib_suffix) = fileparse($file,@suffixlist);
 
-	my $unzip_dir = "/tmp/.webmin/$file_name";
+	my $unzip_dir = &tempname();
 
 	#if old temp extension dir exist, remove it
 	#if( -d $unzip_dir and rmtree($unzip_dir) == 0){

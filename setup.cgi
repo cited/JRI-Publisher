@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 require './tomcat-lib.pl';
+require 'java-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
 foreign_require('software', 'software-lib.pl');
 foreign_require('apache', 'apache-lib.pl');
@@ -247,13 +248,13 @@ EOF
 		$beta_enabled = 1;
 	}
 
-	my @jr_vers = sort sort_version_des &get_jasper_reports_versions($beta_enabled);
+	my %jr_vers = &get_jasper_reports_versions($beta_enabled);
 	my @jr_opts = ( );
-	foreach my $v (@jr_vers) {
+	foreach my $v (sort sort_version_des keys %jr_vers) {
 		if($v =~ /([0-9\-\.a-z]+) BETA$/){
-			push(@jr_opts, [ $v, $1 ]);	#drop BETA from version label
+			push(@jr_opts, [ $jr_vers{$v}, $1 ]);	#drop BETA from version label
 		}else{
-			push(@jr_opts, [ $v, $v ]);
+			push(@jr_opts, [ $jr_vers{$v}, $v ]);
 		}
 	}
 
@@ -311,38 +312,68 @@ EOF
 
 sub parse_jr_versions{
 	my $base_url = $_[0];
-	my @latest_versions;
+	my %latest_versions;
 	my $tmpfile = download_file($base_url);
 	if(! $tmpfile){
-		return '2.4.0';
+		return %latest_versions;
 	}
 
-	my @latest_versions;
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
 		if($line =~ /<a\s+href="([0-9\.]+(\-beta)?)\/">[0-9\.]+(\-beta)?\/<\/a>/){
-			push(@latest_versions, $1);
+			$latest_versions{$1} = $1.'@download';
 		}
 	}
 	close $fh;
-	return @latest_versions;
+	return %latest_versions;
+}
+
+sub parse_jr_gh_versions{
+	my $base_url = $_[0];
+	my %latest_versions;
+	my $tmpfile = download_file($base_url);
+	if(! $tmpfile){
+		return %latest_versions;
+	}
+
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/[^\-]*\-[0-9\.\-]+\.zip)/){
+			$latest_versions{$2} = $2.'@'.$1;
+		}
+	}
+	close $fh;
+	return %latest_versions;
 }
 
 sub get_jasper_reports_versions(){
 	my $beta_enabled = $_[0];
-	my @jr_versions 	= parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/');
+	my %jr_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/');
+	my %gh_versions = parse_jr_gh_versions('https://github.com/daust/JasperReportsIntegration/releases');
+
+	foreach my $v (keys %gh_versions){
+		$jr_versions{$v} = $gh_versions{$v};
+	}
+
 	if($beta_enabled){
-		my @beta_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/Beta-releases/');
-		foreach my $v (@beta_versions){
-			push(@jr_versions, $v." BETA");
+		my %beta_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/Beta-releases/');
+		foreach my $v (keys %beta_versions){
+			$jr_versions{$v." BETA"} = $beta_versions{$v};
 		}
 	}
-	return @jr_versions;
+	return %jr_versions;
 }
 
 sub get_jasper_archive_url{
 	my $jr_ver = $_[0];
 	my $beta_release = $_[1];
+	my $jr_site = $_[2];
+
+	#if our version is from github
+	if($jr_site =~ /\/daust\/JasperReportsIntegration\//){
+		return 'https://github.com'.$jr_site;
+	}
+
 	my $zip_ver = "${jr_ver}.0";
 	my $base_url = 'http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration';
 
@@ -367,9 +398,34 @@ sub get_jasper_archive_url{
 	return "${base_url}/${jr_ver}/JasperReportsIntegration-${zip_ver}.zip";
 }
 
+#set the oc.jasper.config.home manually
+sub update_oc_jasper_config_home(){
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	if(! -f $webxml){
+		print "Error: $webxml not found. Update oc.jasper.config.home manually\n";
+		return;
+	}
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^[ \t]+<param\-name>oc\.jasper\.config\.home</){
+			@{$lref}[$lnum+1] = '<param-value>'.get_catalina_home().'/jasper_reports</param-value>';
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+}
+
 sub install_jasper_reports(){
 	#get Jasper version
-	my $jr_ver = $in{'jr_ver'};
+	my @jr_ver_site = split(/@/, $in{'jr_ver'});
+	my $jr_ver = $jr_ver_site[0];
+	my $jr_site = $jr_ver_site[1];
+
 	my $catalina_home = get_catalina_home();
 	my $jasper_home = $catalina_home.'/jasper_reports';
 
@@ -381,9 +437,16 @@ sub install_jasper_reports(){
 
 	print "<p>Installing Jasper Reports $jr_ver</p>";
 
-	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release);
+	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release, $jr_site);
 	my $tmpfile = download_file($jr_archive_url);
 	my $unzip_dir = unzip_me($tmpfile);
+
+	#github releases are in a subfolder
+	my $subdir = substr(file_basename($tmpfile), 0, -4);	#take filename, and drop .zip
+	if(-d $unzip_dir.'/'.$subdir){
+		$unzip_dir = $unzip_dir.'/'.$subdir;
+	}
+
 	print "Installing JasperReportsIntegration.war</br>";
 	&rename_file($unzip_dir.'/webapp/JasperReportsIntegration.war', $catalina_home.'/webapps/');
 
@@ -402,9 +465,12 @@ sub install_jasper_reports(){
 	$tmpfile = &transname('script.sh');
 	open(my $fh, '>', $tmpfile) or die "open:$!";
 	print $fh "cd $unzip_dir/bin\n";
-	print $fh "chmod +x encryptPasswords.sh setConfigDir.sh\n";
+	print $fh "chmod +x encryptPasswords.sh\n";
 	#print $fh "sh ./encryptPasswords.sh ${$jasper_home}/conf/application.properties\n";
-	print $fh "sh ./setConfigDir.sh $catalina_home/webapps/JasperReportsIntegration.war $jasper_home\n";
+	if(-f $unzip_dir.'/bin/setConfigDir.sh'){
+		print $fh "chmod +x setConfigDir.sh\n";
+		print $fh "sh ./setConfigDir.sh $catalina_home/webapps/JasperReportsIntegration.war $jasper_home\n";
+	}
 	print $fh "chown -R tomcat:tomcat ${jasper_home}\n";
 	close $fh;
 	exec_cmd('bash '.$tmpfile);
@@ -414,6 +480,8 @@ sub install_jasper_reports(){
 	print $fh "\nOC_JASPER_CONFIG_HOME=\"${jasper_home}\"";
 	close $fh;
 
+	tomcat_service_ctl('restart');
+
 	print "Done</br>";
 }
 
@@ -421,6 +489,280 @@ sub install_gen_jri_report(){
 	&copy_source_dest($module_root_directory.'/gen_jri_report.sh', '/usr/local/bin');
 	&set_ownership_permissions('root', 'root', 0755, '/usr/local/bin/gen_jri_report.sh');
 	print 'Installed in /usr/local/bin/gen_jri_report.sh';
+}
+
+sub check_jdbc_pg_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^postgresql\-[0-9\.]+\.jar$/       # pg jar
+      			&& -f "$catalina_home/lib/$_"  # and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
+sub check_jdbc_mysql_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^mysql-connector-java\-[0-9\.]+\.jar$/       # pg jar
+      			&& -f "$catalina_home/lib/$_"  # and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
+sub check_jdbc_mssql_exists(){
+	my $catalina_home = get_catalina_home();
+  opendir(DIR, $catalina_home.'/lib') or die $!;
+  my @jars
+        = grep { /^mssql-jdbc\-[0-9\.]+\.jre[0-9]+\.jar$/   # mssql jar
+      			&& -f "$catalina_home/lib/$_"  									# and is a file
+	} readdir(DIR);
+  closedir(DIR);
+
+	if(@jars){
+  	return $catalina_home.'/lib/'.$jars[0];
+	}else{
+		return $catalina_home.'/lib/';
+	}
+}
+
+sub jri_add_datasource{
+	my $ds = $_[0];
+	my $ds_name = $_[1];
+	open(my $fh, '>>', get_catalina_home().'/jasper_reports/conf/application.properties') or die "open:$!";
+	print $fh "[datasource:$ds]\n";
+	print $fh "type=jndi\n";
+	print $fh "name=$ds_name\n";
+	close $fh
+}
+
+sub ctx_xml_add{
+	my $ref_str = $_[0];
+
+	my $ctxxml = get_catalina_home().'/conf/context.xml';
+	my $lref = &read_file_lines($ctxxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/Context>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($ctxxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
+}
+
+sub web_xml_add{
+	my $ref_str = $_[0];
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/web-app>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
+}
+
+sub install_jri_pg(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC PG page');
+	}
+
+	#find latest
+	$jdbc_pg_ver = '';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<a\s+href="download\/postgresql\-([0-9\.]+)\.jar/){
+			$jdbc_pg_ver = $1;
+			last;
+		}
+	}
+	close $fh;
+
+	print "Downloading JDBC PG ver. ".$jdbc_pg_ver."</br>";
+	$tmpfile = download_file('https://jdbc.postgresql.org/download/postgresql-'.$jdbc_pg_ver.'.jar');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC PG jar');
+	}
+
+	my $jar_filepath = get_catalina_home().'/lib/'.file_basename($tmpfile);
+	&rename_file($tmpfile, $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	my $ref_str = '<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"'."\n";
+  $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
+  $ref_str .= 'maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"'."\n";
+  $ref_str .= 'maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"'."\n";
+	$ref_str .= 'minEvictableIdleTimeMillis="60000" testWhileIdle="true"'."\n";
+	$ref_str .= 'validationQuery="select user" maxAge="600000"'."\n";
+	$ref_str .= 'rollbackOnReturn="true"'."\n";
+	$ref_str .= 'url="jdbc:postgresql://localhost:5432/xxx"'."\n";
+	$ref_str .= 'username="xxx"'."\n";
+	$ref_str .= 'password="xxx"'."\n";
+	$ref_str .= '/>'."\n";
+	ctx_xml_add($ref_str);
+
+	my $ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>postgreSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/postgres</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+	web_xml_add($ref_str);
+
+	jri_add_datasource('postgres', 'postgres');
+
+	print "Done</br>";
+}
+
+sub install_jri_mysql(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL page');
+	}
+
+	#find latest
+	$jdbc_mysql_ver = '';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /<h1>Connector\/J[ \t]+([0-9\.]+)[ \t]/){
+			$jdbc_mysql_ver = $1;
+			last;
+		}
+	}
+	close $fh;
+
+	if(!$jdbc_mysql_ver){
+		die('Error: Failed to parse JDBC MySQL version');
+	}
+
+	print "Downloading JDBC MySQL ver. ".$jdbc_mysql_ver."</br>";
+	$tmpfile = download_file('https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-'.$jdbc_mysql_ver.'.zip');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL zip');
+	}
+
+	my $unzip_dir = unzip_me($tmpfile);
+
+	my $jar_filepath = get_catalina_home().'/lib/mysql-connector-java-'.$jdbc_mysql_ver.'.jar';
+	&rename_file($unzip_dir.'/mysql-connector-java-'.$jdbc_mysql_ver.'/mysql-connector-java-'.$jdbc_mysql_ver.'.jar', $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	my $ref_str = '<Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.mysql.jdbc.Driver"'."\n";
+	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:mysql://localhost:3306/xxx"/>'."\n";
+	ctx_xml_add($ref_str);
+
+	$ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MySQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/MySQL</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	web_xml_add($ref_str);
+
+	jri_add_datasource('MySQL', 'MySQL');
+
+	print "Done</br>";
+}
+
+sub install_jri_mssql(){
+	#download JDBC versions page
+	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15');
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL page');
+	}
+
+	#find latest
+	$jdbc_mssql_ver = '';
+	$jdbc_mssql_url = 'https://go.microsoft.com/fwlink/?linkid=2137600';
+	open(my $fh, '<', $tmpfile) or die "open:$!";
+	while(my $line = <$fh>){
+		if($line =~ /Download Microsoft JDBC Driver ([0-9\.]+)/){
+			$jdbc_mssql_ver = $1;
+
+			if($line =~ /"(https:\/\/go\.microsoft\.com\/fwlink\/?linkid=[0-9]+)"/){
+				$jdbc_mssql_url = $1;
+				last;
+			}
+		}
+	}
+	close $fh;
+
+	if(!$jdbc_mssql_url){
+		die('Error: Failed to parse JDBC MySQL version');
+	}
+
+	print "Downloading JDBC MySQL ver. ".$jdbc_mssql_ver."</br>";
+	$tmpfile = download_file($jdbc_mssql_url);
+	if(!$tmpfile){
+		die('Error: Failed to get JDBC MySQL zip');
+	}
+
+	my $unzip_dir = unzip_me($tmpfile);
+
+	#find which java we have
+	my %jv = get_java_version();
+	my $jdk_major = $jv{'major'};
+
+	my $sqljdbc_dir = $unzip_dir.'/sqljdbc_'.$jdbc_mssql_ver.'\\enu/';
+  opendir(DIR, $sqljdbc_dir) or die $!;
+  my @jars = grep { /^mssql\-jdbc\-[0-9\.]+\.jre$jdk_major\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
+  closedir(DIR);
+
+	if(!@jars){
+		die('Error: Failed to get JDBC MySQL jar for JDK '.$jv{'major'});
+	}
+
+	my $jar_filepath = get_catalina_home().'/lib/'.$jars[0];
+	&rename_file($sqljdbc_dir.'/'.$jars[0], $jar_filepath);
+	print "Moving jar to ".$jar_filepath."</br>";
+
+	my $ref_str = '<Resource name="jdbc/MSSQL" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"'."\n";
+	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:sqlserver://localhost:1433;databaseName=xxx"/>'."\n";
+	ctx_xml_add($ref_str);
+
+	$ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MSSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>jdbc/MSSQL</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	web_xml_add($ref_str);
+
+	jri_add_datasource('MSSQL', 'MSSQL');
+
+	print "Done</br>";
 }
 
 sub setup_checks{
@@ -492,6 +834,21 @@ sub setup_checks{
 			print "<p>JasperReportsIntegration is not installed. To select version and install, ".
 					"<a href='./setup.cgi?mode=select_jasper_version&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
+
+		if(! -f check_jdbc_pg_exists()){
+			print "<p>JRI PG support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_pg&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
+
+		if(! -f check_jdbc_mysql_exists()){
+			print "<p>JRI MySQL support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_mysql&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
+
+		if(! -f check_jdbc_mssql_exists()){
+			print "<p>JRI MSSQL support is not installed. To install it ".
+					"<a href='./setup.cgi?mode=install_jri_mssql&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		}
 	}
 
 	if(! -f '/usr/local/bin/gen_jri_report.sh'){
@@ -517,6 +874,8 @@ sub setup_cleanup{
 			#}
 	}
 	&apache::restart_apache();
+
+	update_oc_jasper_config_home();
 
 	print &js_redirect("index.cgi");
 }
@@ -544,6 +903,9 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "setup_apache_proxy"){			setup_default_apache_proxy();
 }elsif($mode eq "install_jasper_reports"){	install_jasper_reports();
 }elsif($mode eq "install_gen_jri_report"){	install_gen_jri_report();
+}elsif($mode eq "install_jri_pg"){		install_jri_pg();
+}elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
+}elsif($mode eq "install_jri_mssql"){	install_jri_mssql();
 }else{
 	print "Error: Invalid setup mode\n";
 }
