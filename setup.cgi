@@ -447,8 +447,18 @@ sub install_jasper_reports(){
 		$unzip_dir = $unzip_dir.'/'.$subdir;
 	}
 
-	print "Installing JasperReportsIntegration.war</br>";
-	&rename_file($unzip_dir.'/webapp/JasperReportsIntegration.war', $catalina_home.'/webapps/');
+	my $war_name = 'JasperReportsIntegration.war';
+	if( -f $unzip_dir.'/webapp/JasperReportsIntegration.war'){	#before v.2.6.1
+		 $war_name = 'JasperReportsIntegration.war';
+	}elsif(-f $unzip_dir.'/webapp/jri.war'){	# from v.2.6.1
+		$war_name = 'jri.war';
+	}else{
+		die("Error: No war file found");
+	}
+
+	print "Installing $war_name</br>";
+
+	&rename_file($unzip_dir.'/webapp/'.$war_name, $catalina_home.'/webapps/JasperReportsIntegration.war');
 
 	#make the jasper home
 	&make_dir($jasper_home, 0750, 0);
