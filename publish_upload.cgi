@@ -62,7 +62,7 @@ foreach my $f (@files) {
 		next;
 	}
 	&rename_file($f, $dest_dir);
-	&set_ownership_permissions('tomcat','tomcat', 0444, $dest_dir.'/'.$file_name);
+	&set_ownership_permissions('tomcat','tomcat', 0644, $dest_dir.'/'.$file_name);
 	print "Published $file_name successfully in $dest_dir/$file_name</br>";
 }
 
