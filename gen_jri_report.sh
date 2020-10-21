@@ -12,7 +12,7 @@ DONT_MAIL="${2}"
 #set who is sending the mail
 export EMAIL='root@localhost'
 if [ "${EMAIL_TEMPLATE}" ]; then
-  EMAIL_BODY=$(cat $JRI_HOME)/email_tmpl/${EMAIL_TEMPLATE})
+  EMAIL_BODY=$(cat $JRI_HOME/email_tmpl/${EMAIL_TEMPLATE})
 fi
 REPORT_FOLDER=$(dirname ${REP_ID})
 
