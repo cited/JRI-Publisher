@@ -176,6 +176,8 @@ schedule_desc2=Listing all JRI schedules
 schedule_opt_params=Additional URL variables
 schedule_email_subj=Email Subject
 schedule_email_body=Email Body
+schedule_email_tmpl=Email Template
+schedule_with_tmpl=Use template
 
 reports_title=Reports Dashboard
 jri_reports=Reports

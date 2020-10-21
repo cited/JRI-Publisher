@@ -2,6 +2,7 @@
 
 require './tomcat-lib.pl';
 require 'java-lib.pl';
+require 'jru-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
 foreign_require('software', 'software-lib.pl');
 foreign_require('apache', 'apache-lib.pl');
@@ -775,6 +776,17 @@ sub install_jri_mssql(){
 	print "Done</br>";
 }
 
+sub install_email_template(){
+	my $tmp_dir = get_email_tmpl_dir();
+	if(! -d $tmp_dir){
+		&make_dir($tmp_dir, 0755, 1);
+		&set_ownership_permissions('tomcat','tomcat', undef, $tmp_dir);
+	}
+
+	&rename_file($module_root_directory.'/email_template.html', $tmp_dir.'/email_template.html');
+	print "Done</br>";
+}
+
 sub setup_checks{
 
 	#Check for commands
@@ -866,6 +878,11 @@ sub setup_checks{
 				"<a href='./setup.cgi?mode=install_gen_jri_report&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 	}
 
+	if(! -d get_email_tmpl_dir()){
+		print "<p>JRI email template is not installed. To install it ".
+				"<a href='./setup.cgi?mode=install_email_template&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
 	print '<p>If you don\'t see any warning above, you can complete setup from '.
 		  "<a href='setup.cgi?mode=cleanup&return=%2E%2E%2Fjri_publisher%2F&returndesc=Setup&caller=jri_publisher'>here</a></p>";
 }
@@ -916,6 +933,7 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "install_jri_pg"){		install_jri_pg();
 }elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
 }elsif($mode eq "install_jri_mssql"){	install_jri_mssql();
+}elsif($mode eq "install_email_template"){	install_email_template();
 }else{
 	print "Error: Invalid setup mode\n";
 }
