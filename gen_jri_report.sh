@@ -34,7 +34,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -z "${DONT_MAIL}" ]; then
-  echo "${EMAIL_BODY}" | mutt -s "${EMAIL_SUBJ}" -a "${REP_FILEPATH}" -- ${RECP_EMAIL}
+  echo "${EMAIL_BODY}" | mutt -e "set content_type=text/html" -s "${EMAIL_SUBJ}" -a "${REP_FILEPATH}" -- ${RECP_EMAIL}
 fi
 
 exit 0
