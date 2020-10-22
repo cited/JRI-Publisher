@@ -795,8 +795,8 @@ sub install_html_app(){
 	&rename_file($app_dir, '/var/www/html');
 	&exec_cmd("chown -R $www_user:$www_user /var/www/html");
 
-	opendir(DIR, $app_dir.'/portal') or die $!;
-	my @portal_files = grep { -f "$app_dir/portal/$_" } readdir(DIR);
+	opendir(DIR, '/var/www/html/portal') or die $!;
+	my @portal_files = grep { -f '/var/www/html/portal/'.$_ } readdir(DIR);
 	closedir(DIR);
 
 	if (! -d '/etc/webmin/authentic-theme/'){
@@ -804,7 +804,7 @@ sub install_html_app(){
 	}
 
 	foreach my $f (@portal_files){
-		&copy_source_dest($app_dir.'/portal/'.$f, '/etc/webmin/authentic-theme/'.$f);
+		&copy_source_dest('/var/www/html/portal/'.$f, '/etc/webmin/authentic-theme/'.$f);
 	}
 
 	my $hname = get_system_hostname();
