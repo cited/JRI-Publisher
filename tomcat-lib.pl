@@ -179,11 +179,11 @@ sub download_file{
 	&error_setup(&text('install_err3', $url));
 	my $tmpfile = &transname($filename);
   if($silent){
-	   $progress_callback_url = $url;
-     &http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback);
+    &http_download($host, $port, '/'.$path, $tmpfile, \$error, undef);
   }else{
-	   &http_download($host, $port, '/'.$path, $tmpfile, \$error);
-   }
+    $progress_callback_url = $url;
+    &http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback);
+  }
 
 	if($error){
 		print &html_escape($error);
