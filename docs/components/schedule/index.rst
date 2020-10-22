@@ -105,7 +105,18 @@ The Optional Params tab allows you to:
 
 1. Set email subject
 2. Set email message
-3. Add report parameters
+3. Use Email HTML Template
+4. Add report parameters
+
+Email Templates
+===============
+
+You can use HTML Email Templates you created by selecting the desired template from the drop-down list as shown below.
+
+.. image:: _static/use-email-template.png
+
+.. note::
+    Be sure to check the "Use template" box when using an HTML Template.
 
 
 URL Parameters
