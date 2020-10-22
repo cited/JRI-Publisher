@@ -2,6 +2,7 @@
 # Show a page for manually editing an Tomcat server.xml config file
 
 require './tomcat-lib.pl';
+require './jru-lib.pl';
 &ReadParse();
 &ui_print_header(undef, $text{'manual_title'}, "");
 
@@ -14,8 +15,12 @@ my $catalina_home = get_catalina_home();
 			"$catalina_home/conf/tomcat-users.xml",
 			"$catalina_home/conf/web.xml",
 			"$catalina_home/jasper_reports/conf/application.properties",
-			"$catalina_home/webapps/JasperReportsIntegration/WEB-INF/web.xml",
-			$in{'file'});
+			"$catalina_home/webapps/JasperReportsIntegration/WEB-INF/web.xml");
+
+if($in{'file'}){
+	push(@files, $in{'file'});
+}
+
 $in{'file'} ||= $files[0];
 #&indexof($in{'file'}, @files) >= 0 || &error($text{'manual_efile'});
 

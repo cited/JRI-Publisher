@@ -2,9 +2,12 @@
 
 require './tomcat-lib.pl';
 require 'java-lib.pl';
+require 'jru-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
 foreign_require('software', 'software-lib.pl');
 foreign_require('apache', 'apache-lib.pl');
+
+$www_user = 'www-data';
 
 sub sort_version {
 	my @A = split(/\./, $a);
@@ -45,7 +48,7 @@ sub get_tomcat_major_versions(){
 sub major_tomcat_versions{
 	my $major = $_[0];	#Tomcat major version 6,7,8
 
-	my $tmpfile = download_file("http://archive.apache.org/dist/tomcat/tomcat-$major/");
+	my $tmpfile = download_file("http://archive.apache.org/dist/tomcat/tomcat-$major/", 1);
 	if(! -f $tmpfile){
 		error($error);
 	}
@@ -166,20 +169,20 @@ sub install_tomcat_from_archive{
 
 sub get_apache_proxy_file(){
 	my $proxy_file;
-	my %osinfo = &detect_operating_system();
+
 	if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
 		($osinfo{'real_os_type'} =~ /fedora/i)	){	#Fedora
 		if( ! -d '/etc/httpd/'){
 			return 0;
 		}
-		$proxy_file = '/etc/httpd/conf.d/tomcat.conf';
+		$proxy_file = '/etc/httpd/conf.d/includes/tomcat.conf';
 
 	}elsif( ($osinfo{'real_os_type'} =~ /ubuntu/i) or
 			($osinfo{'real_os_type'} =~ /debian/i) 	){	#ubuntu or debian
 		if( ! -d '/etc/apache2/'){
 			return 0;
 		}
-		$proxy_file = '/etc/apache2/conf-enabled/tomcat.conf';
+		$proxy_file = '/etc/apache2/conf-available/tomcat.conf';
 	}
 	return $proxy_file;
 }
@@ -313,7 +316,7 @@ EOF
 sub parse_jr_versions{
 	my $base_url = $_[0];
 	my %latest_versions;
-	my $tmpfile = download_file($base_url);
+	my $tmpfile = download_file($base_url, 1);
 	if(! $tmpfile){
 		return %latest_versions;
 	}
@@ -331,7 +334,7 @@ sub parse_jr_versions{
 sub parse_jr_gh_versions{
 	my $base_url = $_[0];
 	my %latest_versions;
-	my $tmpfile = download_file($base_url);
+	my $tmpfile = download_file($base_url, 1);
 	if(! $tmpfile){
 		return %latest_versions;
 	}
@@ -381,7 +384,7 @@ sub get_jasper_archive_url{
 		$base_url .= '/Beta-releases';
 	}
 
-	my $tmpfile = download_file($base_url.'/'.${jr_ver}.'/');
+	my $tmpfile = download_file($base_url.'/'.${jr_ver}.'/', 1);
 	if(! $tmpfile){
 		return "${base_url}/${jr_ver}/JasperReportsIntegration-${zip_ver}.zip";
 	}
@@ -597,7 +600,7 @@ sub web_xml_add{
 
 sub install_jri_pg(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
+	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC PG page');
 	}
@@ -651,7 +654,7 @@ sub install_jri_pg(){
 
 sub install_jri_mysql(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/');
+	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL page');
 	}
@@ -705,7 +708,7 @@ sub install_jri_mysql(){
 
 sub install_jri_mssql(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15');
+	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL page');
 	}
@@ -775,6 +778,53 @@ sub install_jri_mssql(){
 	print "Done</br>";
 }
 
+sub install_email_template(){
+	my $tmp_dir = get_email_tmpl_dir();
+	if(! -d $tmp_dir){
+		&make_dir($tmp_dir, 0755, 1);
+		&set_ownership_permissions('tomcat','tomcat', undef, $tmp_dir);
+	}
+
+	&rename_file($module_root_directory.'/email_template.html', $tmp_dir.'/email_template.html');
+	print "Done</br>";
+}
+
+sub install_html_app(){
+	my $app_dir = $module_root_directory.'/app';
+	&unlink_file('/var/www/html');
+	&rename_file($app_dir, '/var/www/html');
+	&exec_cmd("chown -R $www_user:$www_user /var/www/html");
+
+	opendir(DIR, '/var/www/html/portal') or die $!;
+	my @portal_files = grep { -f '/var/www/html/portal/'.$_ } readdir(DIR);
+	closedir(DIR);
+
+	if (! -d '/etc/webmin/authentic-theme/'){
+		&make_dir('/etc/webmin/authentic-theme/', 0755, 1);
+	}
+
+	foreach my $f (@portal_files){
+		&copy_source_dest('/var/www/html/portal/'.$f, '/etc/webmin/authentic-theme/'.$f);
+	}
+
+	my $hname = get_system_hostname();
+
+	my $ln=0;
+	my $html_file = '/var/www/html/index.html';
+	$lref = &read_file_lines($html_file);
+	foreach my $line (@$lref){
+		chomp($line);
+		if($line =~ /xyzIP/){
+			$line =~ s/xyzIP/$hname/g;
+			@{$lref}[$ln] = $line;
+		}
+		$ln++;
+	}
+	flush_file_lines($html_file);
+
+	print "Done</br>";
+}
+
 sub setup_checks{
 
 	#Check for commands
@@ -785,7 +835,7 @@ sub setup_checks{
 
 	my @pinfo = software::package_info('haveged', undef, );
 	if(!@pinfo){
-		my %osinfo = &detect_operating_system();
+
 		if( $osinfo{'real_os_type'} =~ /centos/i){	#CentOS
 			@pinfo = software::package_info('epel-release', undef, );
 			if(!@pinfo){
@@ -803,7 +853,7 @@ sub setup_checks{
 	}
 
 	my @pkg_deps;
-	my %osinfo = &detect_operating_system();
+
 	if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
 			($osinfo{'real_os_type'} =~ /fedora/i)	){	#Fedora
 		@pkg_deps = ('httpd', 'unzip', 'wget', 'mutt', 'zip');
@@ -866,6 +916,16 @@ sub setup_checks{
 				"<a href='./setup.cgi?mode=install_gen_jri_report&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 	}
 
+	if(! -d get_email_tmpl_dir()){
+		print "<p>JRI email template is not installed. To install it ".
+				"<a href='./setup.cgi?mode=install_email_template&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if( -d $module_root_directory.'/app'){
+		print "<p>HTML App is not installed. To install it ".
+				"<a href='./setup.cgi?mode=install_html_app&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
 	print '<p>If you don\'t see any warning above, you can complete setup from '.
 		  "<a href='setup.cgi?mode=cleanup&return=%2E%2E%2Fjri_publisher%2F&returndesc=Setup&caller=jri_publisher'>here</a></p>";
 }
@@ -899,6 +959,14 @@ if($ENV{'CONTENT_TYPE'} =~ /boundary=(.*)$/) {
 	&ReadParse(); $no_upload = 1;
 }
 
+%osinfo = &detect_operating_system();
+
+if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
+		($osinfo{'real_os_type'} =~ /fedora/i)	or  #Fedora
+		($osinfo{'real_os_type'} =~ /scientific/i)	){
+	$www_user = 'apache';
+}
+
 my $mode = $in{'mode'} || "checks";
 
 if($mode eq "checks"){							setup_checks();
@@ -916,6 +984,8 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "install_jri_pg"){		install_jri_pg();
 }elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
 }elsif($mode eq "install_jri_mssql"){	install_jri_mssql();
+}elsif($mode eq "install_email_template"){	install_email_template();
+	}elsif($mode eq "install_html_app"){	install_html_app();
 }else{
 	print "Error: Invalid setup mode\n";
 }

@@ -13,6 +13,27 @@ sub get_prop_file(){
   return get_jasper_home().'/conf/application.properties';
 }
 
+sub get_email_tmpl_dir(){
+    return get_jasper_home().'/email_tmpl';
+}
+
+sub get_email_templates(){
+
+  my $template_dir = get_email_tmpl_dir();
+  opendir(DIR, $template_dir) or die "$!:$template_dir";
+  my @templates = grep {
+     /\.html$/                   # ends in .html
+     && -f "$template_dir/$_"     # and is a file
+  } readdir(DIR);
+  closedir(DIR);
+  return @templates;
+}
+
+sub get_email_template_files(){
+  my @rv = map { get_email_tmpl_dir().'/'.$_ } get_email_templates();
+  return @rv;
+}
+
 sub get_jri_cronfile{
   my $period = $_[0];
   if($period eq 'custom'){
@@ -151,6 +172,7 @@ sub load_custom_schedules{
       $scheds{$schid} = {'cron'=>$cron_per, 'rep_id'=>$vars{'REP_ID'}, 'rep_format'=>$vars{'REP_FORMAT'},
                             'rep_ds'=>$vars{'REP_DATASOURCE'}, 'rep_file'=>$vars{'REP_FILE'}, 'rep_rcpt'=>$vars{'RECP_EMAIL'},
                             'rep_email_subj'=>$vars{'EMAIL_SUBJ'}, 'rep_email_body'=>$vars{'EMAIL_BODY'},
+                            'rep_email_tmpl'=>$vars{'EMAIL_TEMPLATE'},
                             'url_opt_params'=>$vars{'OPT_PARAMS'}, 'fln'=>$label.$ln, 'noemail'=>$opt_nomail};
     }
 
@@ -212,6 +234,7 @@ sub build_cmd_line{
               'RECP_EMAIL'=>$schedule{'repEmail'},
               'EMAIL_SUBJ'=>$schedule{'repEmailSubj'},
               'EMAIL_BODY'=>$schedule{'repEmailBody'},
+              'EMAIL_TEMPLATE'=>$schedule{'repEmailTmpl'},
               'OPT_PARAMS'=>'"'.join('&', @optParams).'"');
   write_env_file($sch_env, \%vars);
 

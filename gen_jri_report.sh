@@ -11,6 +11,9 @@ DONT_MAIL="${2}"
 
 #set who is sending the mail
 export EMAIL='root@localhost'
+if [ "${EMAIL_TEMPLATE}" ]; then
+  EMAIL_BODY=$(cat $JRI_HOME/email_tmpl/${EMAIL_TEMPLATE})
+fi
 REPORT_FOLDER=$(dirname ${REP_ID})
 
 #encode the / in report id
@@ -31,7 +34,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -z "${DONT_MAIL}" ]; then
-  echo "${EMAIL_BODY}" | mutt -s "${EMAIL_SUBJ}" -a "${REP_FILEPATH}" -- ${RECP_EMAIL}
+  echo "${EMAIL_BODY}" | mutt -e "set content_type=text/html" -s "${EMAIL_SUBJ}" -a "${REP_FILEPATH}" -- ${RECP_EMAIL}
 fi
 
 exit 0

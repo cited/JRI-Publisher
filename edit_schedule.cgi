@@ -102,6 +102,15 @@ function update_select(){
   }
 }
 
+function update_templ(){
+  var Sel = document.getElementById('repEmailTmpl');
+	if(Sel.options[Sel.selectedIndex].value != 'none'){
+    document.getElementById('repEmailTmpl').disabled = false;
+  }else{
+    document.getElementById('repEmailTmpl').disabled = true;
+  }
+}
+
 function save_opt_params(){
 	var Key = document.getElementsByName('optKey')[0];
   var Val = document.getElementsByName('optVal')[0];
@@ -136,7 +145,12 @@ function clear_disable_obj(name){
 }
 
 function update_nomail(){
-  var mailObjs = ['repEmail', 'repEmailSubj', 'repEmailBody'];
+  var mailObjs = ['repEmail', 'repEmailSubj', 'repEmailBody', 'repEmailTmpl'];
+  mailObjs.forEach(clear_disable_obj);
+}
+
+function update_with_templ(){
+  var mailObjs = ['repEmailTmpl', 'repEmailBody'];
   mailObjs.forEach(clear_disable_obj);
 }
 
@@ -165,6 +179,8 @@ foreach my $per (@cron_period) {
     push(@opt_cron_period, [ $per, $per]);
   }
 }
+
+@opt_email_tmpl = map { [$_, $_]} get_email_templates();
 
 %schedules = load_schedules();
 
@@ -214,7 +230,11 @@ print &ui_table_end();
 
 print &ui_hidden_table_start($text{'schedule_params_optional'}, undef, 2, 'optional_args', 0);
 print &ui_table_row($text{'schedule_email_subj'}, &ui_textbox("repEmailSubj", $sched{'rep_email_subj'}, 20, $sched{'noemail'}));
-print &ui_table_row($text{'schedule_email_body'}, &ui_textarea("repEmailBody", $sched{'rep_email_body'}, 2, 20, 'off', $sched{'noemail'}));
+
+my $with_tmpl = $sched{'rep_email_tmpl'} ? 1 : 0;
+print &ui_table_row($text{'schedule_email_body'}, &ui_textarea("repEmailBody", $sched{'rep_email_body'}, 2, 20, 'off', $sched{'noemail'} || $with_tmpl));
+print &ui_table_row($text{'schedule_email_tmpl'}, &ui_select("repEmailTmpl", $sched{'rep_email_tmpl'}, \@opt_email_tmpl, 1, 0, undef, !$with_tmpl).
+                                                  &ui_checkbox("with_tmpl", 1, '<i>'.$text{'schedule_with_tmpl'}."</i>", $with_tmpl, 'onclick="update_with_templ()"'));
 
 print &ui_table_row($text{'schedule_opt_params'},
     &ui_textbox("optKey", '', 10, $sched{'noemail'}, 20, 'id=optKey').'='.

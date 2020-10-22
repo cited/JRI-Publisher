@@ -176,6 +176,8 @@ schedule_desc2=Listing all JRI schedules
 schedule_opt_params=Additional URL variables
 schedule_email_subj=Email Subject
 schedule_email_body=Email Body
+schedule_email_tmpl=Email Template
+schedule_with_tmpl=Use template
 
 reports_title=Reports Dashboard
 jri_reports=Reports
@@ -197,3 +199,11 @@ publish_destination=Destination directory
 publish_ok=Publish
 publish_extract=Extarct if upload is archive (.zip)
 publish_overwrite=Overwrite existing files
+
+template_title=Email Templates
+template_title_edit=Edit Email Template
+create_eml_tmpl=Create E-mail template file
+tmpl_preview=Preview
+index_return_tmpl=Return to Template Editor
+
+create_ok=Create

@@ -64,6 +64,10 @@ push(@links, "edit_reports.cgi");
 push(@titles, $text{'jri_reports'});
 push(@icons, "images/jri_reports.png");
 
+push(@links, "edit_template.cgi");
+push(@titles, $text{'template_title'});
+push(@icons, "images/template.png");
+
 &icons_table(\@links, \@titles, \@icons, 4);
 
 # Check if tomcat is running

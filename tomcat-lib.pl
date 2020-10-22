@@ -162,6 +162,7 @@ sub process_file_source{
 
 sub download_file{
 	my $url = $_[0];
+  my $silent = $_[1];
 
 	my ($proto, $x, $host, $path) = split('/', $url, 4);
 	my @paths = split('/', $url);
@@ -177,8 +178,12 @@ sub download_file{
 
 	&error_setup(&text('install_err3', $url));
 	my $tmpfile = &transname($filename);
-	$progress_callback_url = $url;
-	&http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback);
+  if($silent){
+    &http_download($host, $port, '/'.$path, $tmpfile, \$error, undef);
+  }else{
+    $progress_callback_url = $url;
+    &http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback);
+  }
 
 	if($error){
 		print &html_escape($error);
