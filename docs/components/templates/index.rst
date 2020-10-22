@@ -43,59 +43,31 @@ To create a new Template, enter the name of the new template and clicking Create
  
 The new template you created will now will be loaded into the editor as shown below:
       
-.. image:: _static/create-template2.png
+.. image:: _static/create-template-2.png
 
 
-Clean: Opens a new window to delete any reports you may wish to delete
+Perform your edits and click the Preview Template link as shown below:
 
-.. image:: _static/reports-cleaner.png 	
+.. image:: _static/create-template-3.png 	
 
-Download:  Opens a new window to download selected report(s) in .zip or .bgz format.
+To return to the Editor, click the return link as shown below:
 
-.. image:: _static/reports-downloader.png 	
+.. image:: _static/create-template-4.png 
+
+.. note::
+    The Preview Template function is basic and it is best to run your HTML code to confirm and check your work.
 
 
-**SchID**::
+Once you are happy with the template, click the Save button.
 
 Link to edit the Schedule for the report
 
-**Cron**::
 
-Displays the cron in use for the Schedule
- 
-**Format**::
+Using Templates
+===============
 
-Displays the report format (e.g. pdf, csv, etc...)
+Templates are assigned by you during schedule creation.
 
-**Data Source**::
-
-Displays report Data Source
-
-**Output**::
-
-Clicking the Browse button will open the report directory in the File Manager as shown below:
-
-.. image:: _static/reports-browse.png
-
-
-**Email**::
-
-Displays report email recipient(s).
-
-**Optional Params**::
-
-Displays any URL Parameters the report is using.
-
-
-No Schedule
-===========
-
-.. note::
-    Any report that does not have a schedule will show the Scheduler icon in the Actions menu.  To add a Schedule, click the icon as shown below.
-
- 
-.. image:: _static/reports-no-schedule.png
-
-   
+You can use a single template on multiple schedules.  
 
 
