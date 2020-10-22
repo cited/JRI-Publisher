@@ -12,7 +12,7 @@ index_install=Install Tomcat
 index_upgrade=Upgrade Tomcat
 
 wars_title=Apps
-manual_title=Edit config
+manual_title=Configuration
 manual_ecannot=You are not allowed to edit the Tomcat server.xml config file
 manual_ok=Edit
 manual_efile=Selected file is not part of the Tomcat server configuration
@@ -200,7 +200,7 @@ publish_ok=Publish
 publish_extract=Extarct if upload is archive (.zip)
 publish_overwrite=Overwrite existing files
 
-template_title=Email Templates
+template_title=Templates
 template_title_edit=Edit Email Template
 create_eml_tmpl=Create E-mail template file
 tmpl_preview=Preview
