@@ -821,6 +821,8 @@ sub install_html_app(){
 		$ln++;
 	}
 	flush_file_lines($html_file);
+
+	print "Done</br>";
 }
 
 sub setup_checks{
