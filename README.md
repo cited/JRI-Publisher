@@ -42,10 +42,18 @@ Archive module
 
 Upload from Webmin->Webmin Configuration->Webmin Modules
 
+
+# 2.6.2 Release Notes
+
+* Added one-click JDNI support for PostgreSQL, MySQL, and MSSQL.
+* Added Responsive HTML Email Templates for scheduled reports.
+* Proxy is still configured during set up, but is no longer enabled by default.
+* Support for Ubuntu 20 LTS
+
 # Notes
 ## CentOS
 May need to install x11 fonts when using OpenJDK
 
 # Links
-- [JasperReportsIntegration](http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/2.4.0/Index.html)
+- [JasperReportsIntegration](https://github.com/daust/JasperReportsIntegration)
 - [JasperReportsIntegration Forum](https://gitq.com/daust/JasperReportsIntegration)
