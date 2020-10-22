@@ -21,8 +21,6 @@ if($in{'file'}){
 	push(@files, $in{'file'});
 }
 
-push(@files, get_email_template_files());
-
 $in{'file'} ||= $files[0];
 #&indexof($in{'file'}, @files) >= 0 || &error($text{'manual_efile'});
 
