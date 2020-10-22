@@ -815,7 +815,7 @@ sub install_html_app(){
 	foreach my $line (@$lref){
 		chomp($line);
 		if($line =~ /xyzIP/){
-			$line = s/xyzIP/$hname/g;
+			$line =~ s/xyzIP/$hname/g;
 			@{$lref}[$ln] = $line;
 		}
 		$ln++;
