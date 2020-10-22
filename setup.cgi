@@ -48,7 +48,7 @@ sub get_tomcat_major_versions(){
 sub major_tomcat_versions{
 	my $major = $_[0];	#Tomcat major version 6,7,8
 
-	my $tmpfile = download_file("http://archive.apache.org/dist/tomcat/tomcat-$major/");
+	my $tmpfile = download_file("http://archive.apache.org/dist/tomcat/tomcat-$major/", 1);
 	if(! -f $tmpfile){
 		error($error);
 	}
@@ -316,7 +316,7 @@ EOF
 sub parse_jr_versions{
 	my $base_url = $_[0];
 	my %latest_versions;
-	my $tmpfile = download_file($base_url);
+	my $tmpfile = download_file($base_url, 1);
 	if(! $tmpfile){
 		return %latest_versions;
 	}
@@ -334,7 +334,7 @@ sub parse_jr_versions{
 sub parse_jr_gh_versions{
 	my $base_url = $_[0];
 	my %latest_versions;
-	my $tmpfile = download_file($base_url);
+	my $tmpfile = download_file($base_url, 1);
 	if(! $tmpfile){
 		return %latest_versions;
 	}
@@ -384,7 +384,7 @@ sub get_jasper_archive_url{
 		$base_url .= '/Beta-releases';
 	}
 
-	my $tmpfile = download_file($base_url.'/'.${jr_ver}.'/');
+	my $tmpfile = download_file($base_url.'/'.${jr_ver}.'/', 1);
 	if(! $tmpfile){
 		return "${base_url}/${jr_ver}/JasperReportsIntegration-${zip_ver}.zip";
 	}
@@ -600,7 +600,7 @@ sub web_xml_add{
 
 sub install_jri_pg(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html');
+	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC PG page');
 	}
@@ -654,7 +654,7 @@ sub install_jri_pg(){
 
 sub install_jri_mysql(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/');
+	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL page');
 	}
@@ -708,7 +708,7 @@ sub install_jri_mysql(){
 
 sub install_jri_mssql(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15');
+	my $tmpfile = download_file('https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver15', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL page');
 	}
