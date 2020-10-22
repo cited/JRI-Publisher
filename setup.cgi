@@ -790,9 +790,22 @@ sub install_email_template(){
 }
 
 sub install_html_app(){
+	my $app_dir = $module_root_directory.'/app';
 	&unlink_file('/var/www/html');
-	&rename_file($module_root_directory.'/app', '/var/www/html');
+	&rename_file($app_dir, '/var/www/html');
 	&exec_cmd("chown -R $www_user:$www_user /var/www/html");
+
+	opendir(DIR, $app_dir.'/portal') or die $!;
+	my @portal_files = grep { -f "$app_dir/portal/$_" } readdir(DIR);
+	closedir(DIR);
+
+	if (! -d '/etc/webmin/authentic-theme/'){
+		&make_dir('/etc/webmin/authentic-theme/', 0755, 1);
+	}
+
+	foreach my $f (@portal_files){
+		&copy_source_dest($app_dir.'/portal/'.$f, '/etc/webmin/authentic-theme/'.$f);
+	}
 
 	my $hname = get_system_hostname();
 
