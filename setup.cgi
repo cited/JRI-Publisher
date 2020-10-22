@@ -7,6 +7,8 @@ require '../webmin/webmin-lib.pl';	#for OS detection
 foreign_require('software', 'software-lib.pl');
 foreign_require('apache', 'apache-lib.pl');
 
+$www_user = 'www-data';
+
 sub sort_version {
 	my @A = split(/\./, $a);
 	my @B = split(/\./, $b);
@@ -167,7 +169,7 @@ sub install_tomcat_from_archive{
 
 sub get_apache_proxy_file(){
 	my $proxy_file;
-	my %osinfo = &detect_operating_system();
+
 	if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
 		($osinfo{'real_os_type'} =~ /fedora/i)	){	#Fedora
 		if( ! -d '/etc/httpd/'){
@@ -787,6 +789,27 @@ sub install_email_template(){
 	print "Done</br>";
 }
 
+sub install_html_app(){
+	&unlink_file('/var/www/html');
+	&rename_file($module_root_directory.'/app', '/var/www/html');
+	&exec_cmd("chown -R $www_user:$www_user /var/www/html");
+
+	my $hname = get_system_hostname();
+
+	my $ln=0;
+	my $html_file = '/var/www/html/index.html';
+	$lref = &read_file_lines($html_file);
+	foreach my $line (@$lref){
+		chomp($line);
+		if($line =~ /xyzIP/){
+			$line = s/xyzIP/$hname/g;
+			@{$lref}[$ln] = $line;
+		}
+		$ln++;
+	}
+	flush_file_lines($html_file);
+}
+
 sub setup_checks{
 
 	#Check for commands
@@ -797,7 +820,7 @@ sub setup_checks{
 
 	my @pinfo = software::package_info('haveged', undef, );
 	if(!@pinfo){
-		my %osinfo = &detect_operating_system();
+
 		if( $osinfo{'real_os_type'} =~ /centos/i){	#CentOS
 			@pinfo = software::package_info('epel-release', undef, );
 			if(!@pinfo){
@@ -815,7 +838,7 @@ sub setup_checks{
 	}
 
 	my @pkg_deps;
-	my %osinfo = &detect_operating_system();
+
 	if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
 			($osinfo{'real_os_type'} =~ /fedora/i)	){	#Fedora
 		@pkg_deps = ('httpd', 'unzip', 'wget', 'mutt', 'zip');
@@ -883,6 +906,11 @@ sub setup_checks{
 				"<a href='./setup.cgi?mode=install_email_template&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 	}
 
+	if( -d $module_root_directory.'/app'){
+		print "<p>HTML App is not installed. To install it ".
+				"<a href='./setup.cgi?mode=install_html_app&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
 	print '<p>If you don\'t see any warning above, you can complete setup from '.
 		  "<a href='setup.cgi?mode=cleanup&return=%2E%2E%2Fjri_publisher%2F&returndesc=Setup&caller=jri_publisher'>here</a></p>";
 }
@@ -916,6 +944,14 @@ if($ENV{'CONTENT_TYPE'} =~ /boundary=(.*)$/) {
 	&ReadParse(); $no_upload = 1;
 }
 
+%osinfo = &detect_operating_system();
+
+if(	( $osinfo{'real_os_type'} =~ /centos/i) or	#CentOS
+		($osinfo{'real_os_type'} =~ /fedora/i)	or  #Fedora
+		($osinfo{'real_os_type'} =~ /scientific/i)	){
+	$www_user = 'apache';
+}
+
 my $mode = $in{'mode'} || "checks";
 
 if($mode eq "checks"){							setup_checks();
@@ -934,6 +970,7 @@ if($mode eq "checks"){							setup_checks();
 }elsif($mode eq "install_jri_mysql"){	install_jri_mysql();
 }elsif($mode eq "install_jri_mssql"){	install_jri_mssql();
 }elsif($mode eq "install_email_template"){	install_email_template();
+	}elsif($mode eq "install_html_app"){	install_html_app();
 }else{
 	print "Error: Invalid setup mode\n";
 }
