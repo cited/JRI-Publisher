@@ -24,6 +24,7 @@ JRI Publisher
     components/datasources/index
     components/publish/index
     components/schedule/index
+    components/templates/index
     components/reports/index
     components/jasper/index
 
