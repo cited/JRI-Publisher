@@ -56,17 +56,15 @@ push(@links, "edit_schedule.cgi");
 push(@titles, $text{'jru_schedule'});
 push(@icons, "images/jr_schedule.png");
 
-#push(@links, "edit_jndi.cgi");
-#push(@titles, $text{'jru_jndi'});
-#push(@icons, "images/jndi.png");
+
+push(@links, "edit_template.cgi");
+push(@titles, $text{'template_title'});
+push(@icons, "images/template.png");
 
 push(@links, "edit_reports.cgi");
 push(@titles, $text{'jri_reports'});
 push(@icons, "images/jri_reports.png");
 
-push(@links, "edit_template.cgi");
-push(@titles, $text{'template_title'});
-push(@icons, "images/template.png");
 
 &icons_table(\@links, \@titles, \@icons, 4);
 
