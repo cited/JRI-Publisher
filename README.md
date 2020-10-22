@@ -11,9 +11,9 @@ Webmin module for installing, configuring, and managing JasperReportsIntegration
 
 JRI Publisher is a Webmin module that installs, configures, and manages Tomcat, Java, and JasperReportsIntegration
 
-It also provides Publishing, Scheduling, and Report Management.
+It also provides Publishing, Scheduling, Email Templates, and Report Management.
 
-It can be used with or without Oracle APEX.
+It can be used with Oracle (with or without Oracle APEX), PostgreSQL, MySQL, and Microsoft SQL Server.
 
 # Docs
 
