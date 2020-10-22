@@ -173,14 +173,14 @@ sub get_apache_proxy_file(){
 		if( ! -d '/etc/httpd/'){
 			return 0;
 		}
-		$proxy_file = '/etc/httpd/conf.d/tomcat.conf';
+		$proxy_file = '/etc/httpd/conf.d/includes/tomcat.conf';
 
 	}elsif( ($osinfo{'real_os_type'} =~ /ubuntu/i) or
 			($osinfo{'real_os_type'} =~ /debian/i) 	){	#ubuntu or debian
 		if( ! -d '/etc/apache2/'){
 			return 0;
 		}
-		$proxy_file = '/etc/apache2/conf-enabled/tomcat.conf';
+		$proxy_file = '/etc/apache2/conf-available/tomcat.conf';
 	}
 	return $proxy_file;
 }
