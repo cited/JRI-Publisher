@@ -84,7 +84,7 @@ if ($running == 1) {
 }
 print ui_buttons_end();
 
-if($config{'jru_checks'}){
+if($config{'jri_checks'}){
 
 	my $num_fixes = 0;
 	if(check_firewall() == 0){
