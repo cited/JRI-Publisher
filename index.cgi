@@ -3,6 +3,7 @@
 
 require './tomcat-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
+require './checks-lib.pl';
 
 # Check if config file exists
 if (! -r $config{'jri_publisher_config'}) {
@@ -72,6 +73,7 @@ push(@icons, "images/jri_reports.png");
 print &ui_hr().&ui_buttons_start();
 my ($running, $status) = &tomcat_service_ctl('status');
 print "$status<br>";
+
 if ($running == 1) {
 	# Running .. offer to apply changes and stop
 	print &ui_buttons_row("stop.cgi", $text{'index_stop'}, "$text{'index_stopmsg'}");
@@ -79,6 +81,64 @@ if ($running == 1) {
 }else {
 	# Not running .. offer to start
 	print &ui_buttons_row("start.cgi", $text{'index_start'}, $text{'index_startmsg'});
+}
+print ui_buttons_end();
+
+if($config{'jru_checks'}){
+
+	my $num_fixes = 0;
+	if(check_firewall() == 0){
+		if($num_fixes == 0){
+			print &ui_hr().'<p>Detected JRU fixes</p>';
+		}
+		$num_fixes++;
+
+		print "<p>Firewalld is not installed. To install it ".
+				"<a href='./checks.cgi?mode=install_firewalld&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if(check_info_page_is_enabled() == 1){
+		if($num_fixes == 0){
+			print &ui_hr().'<p>Detected JRU fixes</p>';
+		}
+		$num_fixes++;
+		print "<p>application.properties::<b>infoPageIsEnabled</b> is enabled. To disable it ".
+				"<a href='./checks.cgi?mode=disable_infopage&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if(check_reports_demo() == 1){
+		if($num_fixes == 0){
+			print &ui_hr().'<p>Detected JRU fixes</p>';
+		}
+		$num_fixes++;
+
+		print "<p>\$JRE_HOME/demo exists. To deleted it ".
+				"<a href='./checks.cgi?mode=remove_demodir&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if(check_prop_passwords() == 1){
+		if($num_fixes == 0){
+			print &ui_hr().'<p>Detected JRU fixes</p>';
+		}
+		$num_fixes++;
+
+		print "<p>Detected unencrypted passwords. To encrypt them ".
+				"<a href='./checks.cgi?mode=enc_prop_pwd&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if(check_ip_addresses_allowed_is_enabled() == 1){
+		if($num_fixes == 0){
+			print &ui_hr().'<p>Detected JRU fixes</p>';
+		}
+		$num_fixes++;
+
+		print "<p>ipAddressesAllowed is not enabled. To add IPs ".
+				"<a href='./checks.cgi?mode=enter_allowed_ips&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+	}
+
+	if($num_fixes > 0){
+		print "Total of $num_fixes issues found</br>";
+	}
 }
 
 &ui_print_footer("/", $text{"index"});

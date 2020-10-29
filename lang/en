@@ -207,3 +207,7 @@ tmpl_preview=Preview
 index_return_tmpl=Return to Template Editor
 
 create_ok=Create
+
+checks_title=Checks
+checks_enter_ips_desc=If you enter more than one IP, use command as separator. For example:
+checks_ip_list=IP List
