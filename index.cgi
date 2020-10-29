@@ -86,6 +86,10 @@ print ui_buttons_end();
 
 if($config{'jri_checks'}){
 
+	my $prop_mtime = (stat(get_prop_file()))[9];
+	my %last_check;
+	read_file_cached($module_config_directory.'/checks_cache', \%last_check);
+
 	my $num_fixes = 0;
 	if(check_firewall() == 0){
 		if($num_fixes == 0){
@@ -97,43 +101,48 @@ if($config{'jri_checks'}){
 				"<a href='./checks.cgi?mode=install_firewalld&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 	}
 
-	if(check_info_page_is_enabled() == 1){
-		if($num_fixes == 0){
-			print &ui_hr().'<p>Detected JRU fixes</p>';
+	if($last_check{'application.properties'} < $prop_mtime){
+		if(check_info_page_is_enabled() == 1){
+			if($num_fixes == 0){
+				print &ui_hr().'<p>Detected JRU fixes</p>';
+			}
+			$num_fixes++;
+			print "<p>application.properties::<b>infoPageIsEnabled</b> is enabled. To disable it ".
+					"<a href='./checks.cgi?mode=disable_infopage&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
-		$num_fixes++;
-		print "<p>application.properties::<b>infoPageIsEnabled</b> is enabled. To disable it ".
-				"<a href='./checks.cgi?mode=disable_infopage&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
-	}
 
-	if(check_reports_demo() == 1){
-		if($num_fixes == 0){
-			print &ui_hr().'<p>Detected JRU fixes</p>';
+		if(check_reports_demo() == 1){
+			if($num_fixes == 0){
+				print &ui_hr().'<p>Detected JRU fixes</p>';
+			}
+			$num_fixes++;
+
+			print "<p>\$JRE_HOME/demo exists. To deleted it ".
+					"<a href='./checks.cgi?mode=remove_demodir&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
-		$num_fixes++;
 
-		print "<p>\$JRE_HOME/demo exists. To deleted it ".
-				"<a href='./checks.cgi?mode=remove_demodir&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
-	}
+		if(check_prop_passwords() == 1){
+			if($num_fixes == 0){
+				print &ui_hr().'<p>Detected JRU fixes</p>';
+			}
+			$num_fixes++;
 
-	if(check_prop_passwords() == 1){
-		if($num_fixes == 0){
-			print &ui_hr().'<p>Detected JRU fixes</p>';
+			print "<p>Detected unencrypted passwords. To encrypt them ".
+					"<a href='./checks.cgi?mode=enc_prop_pwd&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
-		$num_fixes++;
 
-		print "<p>Detected unencrypted passwords. To encrypt them ".
-				"<a href='./checks.cgi?mode=enc_prop_pwd&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
-	}
+		if(check_ip_addresses_allowed_is_enabled() == 1){
+			if($num_fixes == 0){
+				print &ui_hr().'<p>Detected JRU fixes</p>';
+			}
+			$num_fixes++;
 
-	if(check_ip_addresses_allowed_is_enabled() == 1){
-		if($num_fixes == 0){
-			print &ui_hr().'<p>Detected JRU fixes</p>';
+			print "<p>ipAddressesAllowed is not enabled. To add IPs ".
+					"<a href='./checks.cgi?mode=enter_allowed_ips&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
-		$num_fixes++;
 
-		print "<p>ipAddressesAllowed is not enabled. To add IPs ".
-				"<a href='./checks.cgi?mode=enter_allowed_ips&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		$last_check{'application.properties'} = time();
+		&write_file($module_config_directory.'/checks_cache', \%last_check);
 	}
 
 	if($num_fixes > 0){
