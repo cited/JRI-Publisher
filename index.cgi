@@ -141,8 +141,10 @@ if($config{'jri_checks'}){
 					"<a href='./checks.cgi?mode=enter_allowed_ips&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
 		}
 
-		$last_check{'application.properties'} = time();
-		&write_file($module_config_directory.'/checks_cache', \%last_check);
+		if($num_fixes == 0){
+			$last_check{'application.properties'} = time();
+			&write_file($module_config_directory.'/checks_cache', \%last_check);
+		}
 	}
 
 	if($num_fixes > 0){
