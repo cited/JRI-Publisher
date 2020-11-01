@@ -85,7 +85,7 @@ if ($running == 1) {
 print ui_buttons_end();
 
 if($config{'jri_checks'}){
-	my $anounce_msg = '<p>Detected Security Issues:</p>';
+	my $anounce_msg = '<p>&nbsp;&nbsp;The following security issues were detected:</p>';
 	my $prop_mtime = (stat(get_prop_file()))[9];
 	my %last_check;
 	read_file_cached($module_config_directory.'/checks_cache', \%last_check);
@@ -93,28 +93,28 @@ if($config{'jri_checks'}){
 	my $num_fixes = 0;
 	if(check_firewall() == 0){
 		print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-		print_fix_form('Firewalld is not installed', 'install_firewalld');
+		print_fix_form('&nbsp;&nbsp;&nbsp;Firewalld is not installed  ', 'install_firewalld');
 	}
 
 	if($last_check{'application.properties'} < $prop_mtime){
 		if(check_info_page_is_enabled() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print_fix_form('application.properties::<b>infoPageIsEnabled</b> is enabled', 'disable_infopage');
+			print_fix_form('&nbsp;&nbsp;&nbsp;<b>infoPageIsEnabled</b> is set to True', 'disable_infopage');
 		}
 
 		if(check_reports_demo() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print_fix_form('$JRE_HOME/demo exists', 'remove_demodir');
+			print_fix_form('&nbsp;&nbsp;&nbsp;Demo directory exists', 'remove_demodir');
 		}
 
 		if(check_prop_passwords() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print_fix_form('Detected unencrypted passwords', 'enc_prop_pwd');
+			print_fix_form('&nbsp;&nbsp;&nbsp;Unencrypted passwords detected', 'enc_prop_pwd');
 		}
 
 		if(check_ip_addresses_allowed_is_enabled() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print_fix_form('ipAddressesAllowed is not enabled', 'enter_allowed_ips');
+			print_fix_form('&nbsp;&nbsp;&nbsp;ipAddressesAllowed is not enabled', 'enter_allowed_ips');
 		}
 
 		if($num_fixes == 0){
