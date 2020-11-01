@@ -93,33 +93,28 @@ if($config{'jri_checks'}){
 	my $num_fixes = 0;
 	if(check_firewall() == 0){
 		print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-		print "<p>Firewalld is not installed. To install it ".
-				"<a href='./checks.cgi?mode=install_firewalld&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+		print_fix_form('Firewalld is not installed', 'install_firewalld');
 	}
 
 	if($last_check{'application.properties'} < $prop_mtime){
 		if(check_info_page_is_enabled() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print "<p>application.properties::<b>infoPageIsEnabled</b> is enabled. To disable it ".
-					"<a href='./checks.cgi?mode=disable_infopage&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+			print_fix_form('application.properties::<b>infoPageIsEnabled</b> is enabled', 'disable_infopage');
 		}
 
 		if(check_reports_demo() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print "<p>\$JRE_HOME/demo exists. To deleted it ".
-					"<a href='./checks.cgi?mode=remove_demodir&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+			print_fix_form('$JRE_HOME/demo exists', 'remove_demodir');
 		}
 
 		if(check_prop_passwords() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print "<p>Detected unencrypted passwords. To encrypt them ".
-					"<a href='./checks.cgi?mode=enc_prop_pwd&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+			print_fix_form('Detected unencrypted passwords', 'enc_prop_pwd');
 		}
 
 		if(check_ip_addresses_allowed_is_enabled() == 1){
 			print &ui_hr().$anounce_msg if($num_fixes++ == 0);
-			print "<p>ipAddressesAllowed is not enabled. To add IPs ".
-					"<a href='./checks.cgi?mode=enter_allowed_ips&return=%2E%2E%2Fjri_publisher%2Fsetup.cgi&returndesc=Setup&caller=jri_publisher'>click here</a></p>";
+			print_fix_form('ipAddressesAllowed is not enabled', 'enter_allowed_ips');
 		}
 
 		if($num_fixes == 0){

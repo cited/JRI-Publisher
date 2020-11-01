@@ -48,3 +48,10 @@ sub check_prop_passwords(){
 	}
   return 0;
 }
+
+sub print_fix_form{
+  my ($msg, $mode)  = @_;
+  print &ui_form_start("checks.cgi", "post");
+  print &ui_hidden('mode', $mode);
+  print &ui_form_end([ [ "", $text{'check_fix_now'}, '&nbsp;'.$msg ] ]);
+}
