@@ -113,4 +113,4 @@ if($mode eq "install_firewalld"){       install_firewalld();
 	print "Error: Invalid checks mode\n";
 }
 
-&ui_print_footer("/", $text{"index"});
+&ui_print_footer("/", $text{"index_title"});
