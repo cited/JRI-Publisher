@@ -70,4 +70,4 @@ if($unzip_dir ne ''){
 	&rmtree($unzip_dir);	#remove temp dir
 }
 
-&ui_print_footer("", $text{'index_return'}, $in{'edit_publish'}, "Publish");
+&ui_print_footer("", $text{'index_return'}, 'edit_publish.cgi', "Publish");
