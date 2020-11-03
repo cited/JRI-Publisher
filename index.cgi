@@ -41,9 +41,9 @@ push(@links, "edit_java.cgi");
 push(@titles, $text{'java_title'});
 push(@icons, "images/java.png");
 
-push(@links, "edit_proxy.cgi");
-push(@titles, $text{'proxy_title'});
-push(@icons, "images/mapping.png");
+#push(@links, "edit_proxy.cgi");
+#push(@titles, $text{'proxy_title'});
+#push(@icons, "images/mapping.png");
 
 push(@links, "edit_datasource.cgi");
 push(@titles, $text{'jru_title'});
@@ -68,7 +68,7 @@ push(@icons, "images/jri_reports.png");
 
 push(@links, "security.cgi");
 push(@titles, $text{'security_title'});
-push(@icons, "images/locks.fw.png");
+push(@icons, "images/security.png");
 
 
 &icons_table(\@links, \@titles, \@icons, 4);

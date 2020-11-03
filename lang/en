@@ -215,3 +215,4 @@ checks_ip_list=IP List
 check_fix_now=FIX NOW
 
 security_title=Security
+security_return=Return to Security
