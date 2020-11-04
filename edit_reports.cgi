@@ -16,7 +16,8 @@ sub get_schids{
   return sort @rv;
 }
 
-&ui_print_header(undef, $text{'reports_title'}, "");
+&ui_print_header(undef, $text{'reports_title'}, "", "dashboard", 0, 0);
+
 
 print $text{'reports_desc1'}.' '.get_jasper_home();
 
