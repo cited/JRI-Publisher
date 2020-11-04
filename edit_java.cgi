@@ -6,8 +6,7 @@ require '../webmin/webmin-lib.pl';	#for OS detection
 
 &ReadParse();
 
-&ui_print_header(undef, $text{'java_title'}, "");
-
+&ui_print_header(undef, $text{'java_title'}, "", "jdk", 0, 0);
 # Show tabs
 @tabs = ( [ "install",   $text{'java_tabinstall'}, "edit_java.cgi?mode=install" ],
 		  [ "uninstall", $text{'java_tabuninstall'}, "edit_java.cgi?mode=uninstall" ],
