@@ -3,7 +3,7 @@
 require './tomcat-lib.pl';
 &ReadParse();
 
-&ui_print_header(undef, $text{'wars_title'}, "");
+&ui_print_header(undef, $text{'wars_title'}, "", "apps", 0, 0);
 
 # Show tabs
 @tabs = ( [ "install", $text{'wars_tabinstall'}, "edit_wars.cgi?mode=install" ],
