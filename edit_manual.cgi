@@ -4,7 +4,8 @@
 require './tomcat-lib.pl';
 require './jru-lib.pl';
 &ReadParse();
-&ui_print_header(undef, $text{'manual_title'}, "");
+&ui_print_header(undef, $text{'manual_title'}, "", "configs", 0, 0);
+
 
 my $catalina_home = get_catalina_home();
 
