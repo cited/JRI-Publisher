@@ -89,7 +89,7 @@ if($in{'submit_flag'} == 1){
   $in{'submit_flag'} = 0;
 }
 
-&ui_print_header(undef, $text{'jru_schedule'}, "");
+&ui_print_header(undef, $text{'jru_schedule'}, "", "schedules", 0, 0);
 
 print <<EOF;
 <script type="text/javascript">
