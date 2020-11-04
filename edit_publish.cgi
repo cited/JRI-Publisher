@@ -3,7 +3,7 @@
 require './tomcat-lib.pl';
 &ReadParse();
 
-&ui_print_header(undef, $text{'jru_publish'}, "");
+&ui_print_header(undef, $text{'jru_publish'}, "", "publish", 0, 0);
 
 # Show tabs
 @tabs = ( [ "upload", $text{'publish_tabupload'}, "edit_publish.cgi?mode=upload" ]);
