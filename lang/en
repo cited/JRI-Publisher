@@ -199,6 +199,7 @@ publish_destination=Destination directory
 publish_ok=Publish
 publish_extract=Extarct if upload is archive (.zip)
 publish_overwrite=Overwrite existing files
+publish_install=Report Published
 
 template_title=Templates
 template_title_edit=Edit Email Template
@@ -207,3 +208,11 @@ tmpl_preview=Preview
 index_return_tmpl=Return to Template Editor
 
 create_ok=Create
+
+checks_title=Checks
+checks_enter_ips_desc=If you enter more than one IP, use command as separator. For example:
+checks_ip_list=IP List
+check_fix_now=FIX NOW
+
+security_title=Security
+security_return=Return to Security

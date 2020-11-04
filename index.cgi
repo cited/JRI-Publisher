@@ -3,6 +3,7 @@
 
 require './tomcat-lib.pl';
 require '../webmin/webmin-lib.pl';	#for OS detection
+require './checks-lib.pl';
 
 # Check if config file exists
 if (! -r $config{'jri_publisher_config'}) {
@@ -40,9 +41,9 @@ push(@links, "edit_java.cgi");
 push(@titles, $text{'java_title'});
 push(@icons, "images/java.png");
 
-push(@links, "edit_proxy.cgi");
-push(@titles, $text{'proxy_title'});
-push(@icons, "images/mapping.png");
+#push(@links, "edit_proxy.cgi");
+#push(@titles, $text{'proxy_title'});
+#push(@icons, "images/mapping.png");
 
 push(@links, "edit_datasource.cgi");
 push(@titles, $text{'jru_title'});
@@ -65,6 +66,10 @@ push(@links, "edit_reports.cgi");
 push(@titles, $text{'jri_reports'});
 push(@icons, "images/jri_reports.png");
 
+push(@links, "security.cgi");
+push(@titles, $text{'security_title'});
+push(@icons, "images/security.png");
+
 
 &icons_table(\@links, \@titles, \@icons, 4);
 
@@ -72,6 +77,7 @@ push(@icons, "images/jri_reports.png");
 print &ui_hr().&ui_buttons_start();
 my ($running, $status) = &tomcat_service_ctl('status');
 print "$status<br>";
+
 if ($running == 1) {
 	# Running .. offer to apply changes and stop
 	print &ui_buttons_row("stop.cgi", $text{'index_stop'}, "$text{'index_stopmsg'}");
@@ -80,5 +86,7 @@ if ($running == 1) {
 	# Not running .. offer to start
 	print &ui_buttons_row("start.cgi", $text{'index_start'}, $text{'index_startmsg'});
 }
+print ui_buttons_end();
+
 
 &ui_print_footer("/", $text{"index"});

@@ -15,7 +15,7 @@ else { &ReadParse(); $no_upload = 1; }
 
 $| = 1;
 $theme_no_table = 1 if ($in{'source'} == 2 || $in{'source'} == 4);
-&ui_print_header(undef, $text{'install_title'}, "");
+&ui_print_header(undef, $text{'publish_install'}, "");
 
 my $upload_path = get_jasper_home().'/reports';
 my $dest_dir = $upload_path.'/'.$in{'destination'};
@@ -23,14 +23,14 @@ my $dest_dir = $upload_path.'/'.$in{'destination'};
 #check if upload dir has .. in path
 if($dest_dir =~ /\.\./){
 	print "Error: Invalid upload dir $dest_dir</br>";
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer("", $text{'index_return'}, $in{'edit_publish'}, "Publish");
 	exit;
 }
 
 my $file = process_file_source();
 if(! $file){
 	print "Error: Invalid file $file</br>";
-	&ui_print_footer("", $text{'index_return'});
+	&ui_print_footer("", $text{'index_return'}, $in{'edit_publish'}, "Publish");
 	exit;
 }
 my $unzip_dir = '';
@@ -70,4 +70,4 @@ if($unzip_dir ne ''){
 	&rmtree($unzip_dir);	#remove temp dir
 }
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("", $text{'index_return'}, 'edit_publish.cgi', "Publish");

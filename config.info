@@ -2,3 +2,4 @@ jri_publisher_config=Path to the Webmin JRI Publisher module config file,8
 tomcat_service=Path to tomcat service command,8
 report_ls=Report list type,1,2-File Manager,1-All,0-Most Recent
 mail_on_run=Mail report on Run,1,1-Yes,0-No
+jri_checks=Check for JRI issues,1,1-Yes,0-No

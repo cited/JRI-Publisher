@@ -2,3 +2,4 @@ jri_publisher_config=/etc/webmin/jri_publisher/config
 tomcat_service=/etc/init.d/tomcat
 report_ls=2
 mail_on_run=0
+jri_checks=1
