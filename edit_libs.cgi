@@ -3,7 +3,8 @@
 require './tomcat-lib.pl';
 &ReadParse();
 
-&ui_print_header(undef, $text{'libs_title'}, "");
+&ui_print_header(undef, $text{'libs_title'}, "", "libraries", 0, 0);
+
 
 # Show tabs
 @tabs = ( [ "install",   $text{'libs_tabinstall'}, "edit_libs.cgi?mode=install" ],
