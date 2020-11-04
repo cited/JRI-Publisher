@@ -24,21 +24,6 @@ my %version = get_catalina_version();
 &ui_print_header(undef, $text{'security_title'}, "", "security", 0, 0);
 
 
-#&ui_print_header(undef, $text{'index_title'}, "");
-
-
-
-
-
-
-#&ui_print_header(undef, $text{'libs_title'}, "");
-
-
-
-
-
-
-
 &icons_table(\@links, \@titles, \@icons, 4);
 
 print ui_buttons_end();
