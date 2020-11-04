@@ -3,7 +3,7 @@
 require './tomcat-lib.pl';
 require './jru-lib.pl';
 &ReadParse();
-&ui_print_header(undef, $text{'template_title_edit'}, "");
+&ui_print_header(undef, $text{'template_title_edit'}, "", "templates", 0, 0);
 
 # Work out and show the files
 @files = get_email_template_files();
