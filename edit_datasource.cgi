@@ -75,7 +75,8 @@ sub jru_rm_entry{
 }
 
 &ReadParse();
-&ui_print_header(undef, $text{'jru_title'}, "");
+&ui_print_header(undef, $text{'jru_title'}, "", "sources", 0, 0);
+
 
 #Make options for type field
 my @jru_types = ('jdbc', 'jndi');
