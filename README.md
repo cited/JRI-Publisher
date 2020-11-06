@@ -47,8 +47,10 @@ Upload from Webmin->Webmin Configuration->Webmin Modules
 
 * Added one-click JDNI support for PostgreSQL, MySQL, and MSSQL.
 * Added Responsive HTML Email Templates for scheduled reports.
+* Added Security tab to fix common security issues.
 * Proxy is still configured during set up, but is no longer enabled by default.
 * Support for Ubuntu 20 LTS
+* Added contextual help links
 
 # Notes
 ## CentOS
