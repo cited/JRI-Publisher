@@ -16,7 +16,7 @@ You can use the `Security Monitor`_ on your installation to address common secur
 
 The above is only meant to address a subset of JRI security areas.
 
-It does not address basic server security such as changing porta, disablingf root access, etc...
+It does not address basic server security such as changing ports, disabling root access, etc...
 
 
 
