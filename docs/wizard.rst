@@ -98,14 +98,12 @@ Once each step of the Wizard is completed, the Wizard can be removed:
 
 With the Wizard completed, your module should appear as below:
 
-.. image:: _static/start-jri.png
+.. image:: _static/JRI-Publisher-Main.png
 
 
 
 .. note::
-    The JRI application is not deployed at this point.  You need to Start Tomcat
-    in order to deploy it.  Do so before any further operations as it is required
-    to write configuration files, etc...
+    The JRI application is deployed at this point.  You can proceed to create data sources, publish reports, etc..
     
 
 About Haveged
