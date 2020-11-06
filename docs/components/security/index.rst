@@ -7,7 +7,7 @@
    :width: 1em
 
 **********************
-Security Checks
+Security Monitor
 **********************
 
 .. contents:: Table of Contents
