@@ -27,50 +27,59 @@ Checks
 
 The security page evaluates five checks and provides fixes if check fails.
 
-* Is Firewalld installed and enabled?
-* Is the InfoPage enabled?
-* Has the demo directory been deleted?
-* Are passwords in plain text?
-* Is ipAddressesAllowed being used?
+* Firewalld status
+* InfoPage status
+* Demo directory status
+* Password encryption status
+* ipAddressesAllowed status
 
-Fixing Errors
-=================
+Fixing Security Issues
+======================
 
-To fix an security issue, simply click the "Fix Now" button as shown.
+Whether or not you elect to fix an issue is up to you.
 
-.. image:: _static/create-template.png
+To fix a security issue, simply click the "Fix Now" button as shown.
+
+.. image:: _static/fix.png
+
+
+
+Firewalld
+======================
+
+It's important to limit the IPs that have access to your JRI instance to the database(s) being served.
+
+
+InfoPage
+======================
+
+The info page shows important information and should be disabled.
+
+Clicking the Fix Now button will disable the page in your application.properties file.
+
+
+Demo Directory 
+======================
+The demo directory should be deleted in production environments. 
+
+
+Password Encryption
+======================
+
+Clicking the button will encrypt all un-encrypted passwords in your application.properties file.
+
+Whenever a new password is added via a Data Source, you can encrypt via this location.
+
+ipAddressesAllowed
+======================
+Restrict access to JRI based on IP address
 
 .. note::
-    You must include the .html file extension in the name of the template you create.
+    Each time a Data Source password is added via the Data Source tab, you will see the status for password encryption change.  
  
  
-The new template you created will now will be loaded into the editor as shown below:
-      
-.. image:: _static/create-template-2.png
+Please see https://github.com/daust/JasperReportsIntegration#security for additional information.
 
-
-Perform your edits and click the Preview Template link as shown below:
-
-.. image:: _static/create-template-3.png 	
-
-To return to the Editor, click the return link as shown below:
-
-.. image:: _static/create-template-4.png 
-
-.. note::
-    The Preview Template function is basic and it is best to run your HTML code to confirm and check your work.
-
-
-Once you are happy with the template, click the Save button.
-
-Link to edit the Schedule for the report
-
-
-Using Templates
-===============
-
-Templates are assigned by you during schedule creation.
-
-You can use a single template on multiple schedules.  
+ 
 
 
