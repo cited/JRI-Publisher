@@ -10,9 +10,9 @@
 Security
 **********************
 
-As with JasperReportsIntegration, JRI Publisher should be run behind a firewall with access to port 8080 and 1521 restriced to the database server.
+Please use the Security Tab on your installation to address common security issues.
 
-You should also change the Webmin port, as well as disable root access via SSH.
+You should also change the Webmin port, SSH port, disable root access via SSH.
 
 .. note::
     All Tomcat and JRI services are owned and run by user tomcat with minimal privilages. 
