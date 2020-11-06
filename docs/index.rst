@@ -26,6 +26,7 @@ JRI Publisher
     components/schedule/index
     components/templates/index
     components/reports/index
+    components/security/index
     components/jasper/index
 
 .. toctree::
