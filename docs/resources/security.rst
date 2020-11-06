@@ -10,7 +10,7 @@
 Security
 **********************
 
-* You can use the `Security Monitor`_ on your installation to address common security issues.
+ You can use the `Security Monitor`_ on your installation to address common security issues.
 
 .. _`Security Monitor`: https://jripub.davidghedini.com/en/latest/components/security/index.html 
 
