@@ -62,29 +62,34 @@ The JNDI entries are optional.
     
 The JNDI elements added are shown below.  These defaults and must be edited with your own host, username, etc...
 
+.. code-block:: xml
+   :linenos:
 
-<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"
-  driverClassName="org.postgresql.Driver"
-  maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"
-  maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"
-  minEvictableIdleTimeMillis="60000" testWhileIdle="true"
-  validationQuery="select user" maxAge="600000"
-  rollbackOnReturn="true"
-  url="jdbc:postgresql://localhost:5432/xxx"
-  username="xxx"
-  password="xxx"
-/>
-<Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"
-maxTotal="100" maxIdle="30" maxWaitMillis="10000"
-driverClassName="com.mysql.jdbc.Driver"
-username="xxx" password="xxx"  url="jdbc:mysql://localhost:3306/xxx"/>
-<Resource name="jdbc/MSSQL" auth="Container" type="javax.sql.DataSource"
-maxTotal="100" maxIdle="30" maxWaitMillis="10000"
-driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-username="xxx" password="xxx"  url="jdbc:sqlserver://localhost:1433;databaseName=xxx"/>
-</Context>
+
+    <Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"
+    driverClassName="org.postgresql.Driver"
+    maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"
+    maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"
+    minEvictableIdleTimeMillis="60000" testWhileIdle="true"
+    validationQuery="select user" maxAge="600000"
+    rollbackOnReturn="true"
+    url="jdbc:postgresql://localhost:5432/xxx"
+    username="xxx"
+    password="xxx"
+    />
+
+    <Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"
+    maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+    driverClassName="com.mysql.jdbc.Driver"
+    username="xxx" password="xxx"  url="jdbc:mysql://localhost:3306/xxx"/>
     
-Finishing Installation
+    <Resource name="jdbc/MSSQL" auth="Container" type="javax.sql.DataSource"
+    maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+    driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    username="xxx" password="xxx"  url="jdbc:sqlserver://localhost:1433;databaseName=xxx"/>
+
+    
+Completing Installation
 ========================
  
 Once each step of the Wizard is completed, the Wizard can be removed:
