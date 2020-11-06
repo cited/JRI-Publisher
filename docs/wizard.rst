@@ -51,9 +51,9 @@ JRI Publihsher has been tested with JasperReportsIntegration 2.5.1 and 2.6.2:
 JNDI Entries
 ========================
 
-.. image:: _static/13-jri.png
+JRI Publihsher allows you to add JNDI templates, and associated JARS for PostgreSQL, MySQL, and MSSQL as shown below:
 
-JRI Publihsher allows you to add JNDI templates, and associated JARS for PostgreSQL, MySQL, and MSSQL
+.. image:: _static/JRI-JNDI.png
 
 The JNDI entries are optional.
 
