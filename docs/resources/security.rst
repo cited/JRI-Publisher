@@ -10,9 +10,14 @@
 Security
 **********************
 
-Please use the Security Tab on your installation to address common security issues.
+You can use the `Security Monitor`_ on your installation to address common security issues.
+.. _`Security Monitor`: https://jripub.davidghedini.com/en/latest/components/security/index.html 
 
-You should also change the Webmin port, SSH port, disable root access via SSH.
+The above is only meant to address a subset of JRI security areas.
+
+It does not address basic server security such as changing porta, disablingf root access, etc...
+
+
 
 .. note::
     All Tomcat and JRI services are owned and run by user tomcat with minimal privilages. 
