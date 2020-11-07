@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# David Ghedini
+# For use on fresh CentOS 8 install only!!!
 
 function disable_selinux(){
 	setenforce 0
