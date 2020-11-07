@@ -70,6 +70,11 @@ Clicking the button will encrypt all un-encrypted passwords in your application.
 
 Whenever a new password is added via a Data Source, you can encrypt via this location.
 
+ .. note::
+ 
+   You may see an error displayed:  ERROR StatusLogger No log4j2 configuration file found. Using default configuration...
+   The error is due to configuration and does not effect encryption.
+
 ipAddressesAllowed
 ======================
 Restrict access to JRI based on IP address
