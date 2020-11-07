@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# David Ghedini
+# For use on fresh Ubuntu 20 install only!!!
 
 function install_tomcat_archive(){
 
