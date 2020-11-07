@@ -182,6 +182,7 @@ function install_jri_module(){
 function install_jri_war(){
 
   JASPER_HOME="${CATALINA_HOME}/jasper_reports"
+	mkdir -p "${JASPER_HOME}"
 
   JRI_URL_PATH=$(wget -O- https://github.com/daust/JasperReportsIntegration/releases/latest | sed -n 's|.*\(/daust/JasperReportsIntegration/releases/download/.*\.zip\).*|\1|p')
 
@@ -196,7 +197,7 @@ function install_jri_war(){
 
   for d in reports conf logs schedules; do
     if [ -d ${JRI_FOLDER}/${d} ]; then
-      mv ${JRI_FOLDER}/${d} ${JASPER_HOME}/
+      mv ${JRI_FOLDER}/${d} ${JASPER_HOME}/${d}
     else
       mkdir ${JASPER_HOME}/${d}
     fi
