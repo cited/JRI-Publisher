@@ -1,4 +1,48 @@
-<?php
+.. This is a comment. Note how any initial comments are moved by
+   transforms to after the document title, subtitle, and docinfo.
+
+.. demo.rst from: http://docutils.sourceforge.net/docs/user/rst/demo.txt
+
+.. |EXAMPLE| image:: static/yi_jing_01_chien.jpg
+   :width: 1em
+
+**********************
+Calling Reports
+**********************
+
+.. contents:: Table of Contents
+
+Calling Reports
+========================
+
+The information below is a quick start guide to calling reports from non-APEX environments.
+
+Cautions
+==============
+
+It is important that the following be observed::
+   
+   Access to the JRI installation via 8080 must be limited to the web server.
+   
+   Do not disply the report URL in any way
+   
+   
+   
+Example
+==========
+
+Below is a basic example of calling Jasper reports via a drop-down using PHP.
+
+The drop-down contains the _reportName parameter, which is passed to the PHP code.  
+
+The code then parses the _reportName parameter to create the url.
+
+.. code-block:: bash
+   :linenos:
+
+
+
+	<?php
 
 
 if (isset($_GET['report_name'])) {
@@ -44,3 +88,16 @@ if (isset($_GET['report_name'])) {
 
     </body>
 </html>
+
+
+Blocking Port
+================
+
+Be certain that access to port 8080/8443 is open only to the web server.
+
+
+
+
+
+
+
