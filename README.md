@@ -27,15 +27,15 @@ Ubuntu 20 LTS
 
 # Simple Install (Ubuntu):
 
-      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_unattended_ubuntu.sh
-      chmod +x jri_unattended_ubuntu.sh
-      ./jri_unattended_ubuntu.sh
+      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_ubuntu.sh
+      chmod +x jri_ubuntu.sh
+      ./jri_ubuntu.sh
       
 # Simple Install (CentOS):
 
-      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_unattended_centos.sh
-      chmod +x jri_unattended_centos.sh
-      ./jri_unattended_centos.sh
+      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_centos.sh
+      chmod +x jri_centos.sh
+      ./jri_centos.sh
 
 # Advanced Install:
 
