@@ -25,7 +25,19 @@ CentOS 8<br>
 Ubuntu 18 LTS<br>
 Ubuntu 20 LTS
 
-# Install via Script:
+# Simple Install (Ubuntu):
+
+      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_unattended_ubuntu.sh
+      chmod +x jri_unattended_ubuntu.sh
+      ./jri_unattended_ubuntu.sh
+      
+# Simple Install (CentOS):
+
+      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_unattended_centos.sh
+      chmod +x jri_unattended_centos.sh
+      ./jri_unattended_centos.sh
+
+# Advanced Install:
 
       wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/pre-install.sh
       chmod +x pre-install.sh
@@ -43,7 +55,7 @@ Archive module
 Upload from Webmin->Webmin Configuration->Webmin Modules
 
 
-# 2.6.2 Release Notes
+# 2.7.0 Release Notes
 
 * Added one-click JDNI support for PostgreSQL, MySQL, and MSSQL.
 * Added Responsive HTML Email Templates for scheduled reports.
@@ -51,6 +63,7 @@ Upload from Webmin->Webmin Configuration->Webmin Modules
 * Proxy is still configured during set up, but is no longer enabled by default.
 * Support for Ubuntu 20 LTS
 * Added contextual help links
+* Added PHP Report Example
 
 # Notes
 ## CentOS
