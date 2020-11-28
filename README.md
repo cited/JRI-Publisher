@@ -2,6 +2,8 @@
 
 [![Documentation Status](https://readthedocs.org/projects/jri-publisher/badge/?version=latest)](https://jripub.davidghedini.com/en/latest/?badge=latest)
 
+<a href="https://www.paypal.com/donate?hosted_button_id=UE9VQB43NJ456"><img alt="Donate" border="0" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"></a>
+
 Webmin module for installing, configuring, and managing JasperReportsIntegration.
 
 ![JRI Publisher](docs/_static/JRI-Publisher-Main.png)
