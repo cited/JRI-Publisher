@@ -261,8 +261,14 @@ EOF
 		}
 	}
 
-	print &ui_table_row($text{'jru_release'}, &ui_select("jr_ver", undef, \@jr_opts,1, 0).'</br>'.
-																						&ui_checkbox("show_beta", 1, $text{'jru_show_beta'}, $beta_enabled, 'onclick="update_versions()"'));
+	print &ui_table_row($text{'base_installsource'},
+		&ui_radio_table("source", 100,
+			[ [100, $text{'jru_release'}, &ui_select("jr_ver", undef, \@jr_opts,1, 0).'</br>'.
+																	  &ui_checkbox("show_beta", 1, $text{'jru_show_beta'}, $beta_enabled, 'onclick="update_versions()"')],
+			  [ 0, $text{'source_local'}, &ui_textbox("file", undef, 40)." ". &file_chooser_button("file", 0) ],
+			  [ 1, $text{'source_uploaded'}, &ui_upload("upload", 40) ],
+			  [ 2, $text{'source_ftp'},&ui_textbox("url", undef, 40) ]
+		    ]));
 
 	print &ui_table_end();
 	print &ui_form_end([ [ "", $text{'base_installok'} ] ]);
@@ -341,7 +347,7 @@ sub parse_jr_gh_versions{
 
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
-		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/[^\-]*\-[0-9\.\-]+\.zip)/){
+		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/(JasperReportsIntegration|jri)\-[a-z0-9\.\-]+\.zip)/){
 			$latest_versions{$2} = $2.'@'.$1;
 		}
 	}
@@ -424,24 +430,29 @@ sub update_oc_jasper_config_home(){
 }
 
 sub install_jasper_reports(){
-	#get Jasper version
-	my @jr_ver_site = split(/@/, $in{'jr_ver'});
-	my $jr_ver = $jr_ver_site[0];
-	my $jr_site = $jr_ver_site[1];
 
 	my $catalina_home = get_catalina_home();
 	my $jasper_home = $catalina_home.'/jasper_reports';
 
-	my $beta_release = 0;
-	if($jr_ver =~ /([0-9\-\.a-z]+) BETA$/){
-		$jr_ver = $1;
-		$beta_release = 1;
-	}
-
 	print "<p>Installing Jasper Reports $jr_ver</p>";
 
-	my $jr_archive_url = get_jasper_archive_url($jr_ver, $beta_release, $jr_site);
-	my $tmpfile = download_file($jr_archive_url);
+	if($in{'source'} == 100){
+		#get Jasper version
+		my @jr_ver_site = split(/@/, $in{'jr_ver'});
+		my $jr_ver = $jr_ver_site[0];
+		my $jr_site = $jr_ver_site[1];
+
+		my $beta_release = 0;
+		if($jr_ver =~ /([0-9\-\.a-z]+) BETA$/){
+			$jr_ver = $1;
+			$beta_release = 1;
+		}
+
+		$in{'url'} = get_jasper_archive_url($jr_ver, $beta_release, $jr_site);
+		$in{'source'} = 2;
+	}
+
+	my $tmpfile = process_file_source();
 	my $unzip_dir = unzip_me($tmpfile);
 
 	#github releases are in a subfolder
