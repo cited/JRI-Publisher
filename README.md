@@ -66,6 +66,7 @@ Upload from Webmin->Webmin Configuration->Webmin Modules
 * Support for Ubuntu 20 LTS
 * Added contextual help links
 * Added PHP Report Example
+* Updated url links to accomodate new version (08-12-2020)
 
 # Notes
 ## CentOS
