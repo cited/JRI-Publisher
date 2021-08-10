@@ -11,7 +11,7 @@ function install_tomcat_archive(){
 
 	if [ ! -d apache-tomcat-${TOMCAT_VER} ]; then
 		if [ ! -f /tmp/apache-tomcat-${TOMCAT_VER}.tar.gz ]; then
-			wget --no-check-certificate -P/tmp http://www.us.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz
+			wget --no-check-certificate -P/tmp http://www.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz
 		fi
 		tar xzf /tmp/apache-tomcat-${TOMCAT_VER}.tar.gz
 		chown -R tomcat:tomcat apache-tomcat-${TOMCAT_VER}
