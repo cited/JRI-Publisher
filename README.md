@@ -55,7 +55,7 @@ Archive module
 Upload from Webmin->Webmin Configuration->Webmin Modules
 
 
-# 2.7.0 Release Notes
+# 2.7.1 Release Notes
 
 * Added one-click JDNI support for PostgreSQL, MySQL, and MSSQL.
 * Added Responsive HTML Email Templates for scheduled reports.
