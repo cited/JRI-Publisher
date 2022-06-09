@@ -1,4 +1,4 @@
-# JRI Publisher
+# Jasper Publisher
 
 [![Documentation Status](https://readthedocs.org/projects/jri-publisher/badge/?version=latest)](https://jripub.davidghedini.com/en/latest/?badge=latest)
 
@@ -9,7 +9,7 @@ Webmin module for installing, configuring, and managing JasperReportsIntegration
 
 # About
 
-JRI Publisher is a Webmin module that installs, configures, and manages Tomcat, Java, and JasperReportsIntegration
+Jasper Publisher is a Webmin module that installs, configures, and manages Tomcat, Java, and JasperReportsIntegration
 
 It also provides Publishing, Scheduling, Email Templates, and Report Management.
 
