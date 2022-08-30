@@ -43,7 +43,7 @@ function download_jri_publisher_module(){
 pushd /tmp/
 	wget https://github.com/DavidGhedini/jri-publisher/archive/master.zip
 	unzip master.zip
-	mv jri-publisher-master jri_publisher
+	mv jasper-publisher-master jri_publisher
 	tar -czf /opt/jri_publisher.wbm.gz jri_publisher
 	rm -rf jri_publisher master.zip
 popd
