@@ -141,12 +141,12 @@ function install_java(){
 }
 
 function install_jri_module(){
-  wget --no-check-certificate -P/tmp https://github.com/DavidGhedini/jri-publisher/archive/master.zip
+  wget --no-check-certificate -P/tmp https://github.com/DavidGhedini/jasper-publisher/archive/master.zip
 
 	unzip /tmp/master.zip
   rm -f /tmp/master.zip
 
-  mv jri-publisher-master jri_publisher
+  mv jasper-publisher-master jri_publisher
 	tar -czf /tmp/jri_publisher.wbm.gz jri_publisher
 	rm -rf jri_publisher
 
