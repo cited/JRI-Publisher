@@ -41,7 +41,7 @@ EOF
 
 function download_jri_publisher_module(){
 pushd /tmp/
-	wget https://github.com/DavidGhedini/jri-publisher/archive/master.zip
+	wget https://github.com/DavidGhedini/jasper-publisher/archive/master.zip
 	unzip master.zip
 	mv jasper-publisher-master jri_publisher
 	tar -czf /opt/jri_publisher.wbm.gz jri_publisher
