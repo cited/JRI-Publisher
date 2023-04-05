@@ -338,27 +338,46 @@ sub parse_jr_versions{
 }
 
 sub parse_jr_gh_versions{
-	my $base_url = $_[0];
+	my $base_url = 'https://github.com/daust/JasperReportsIntegration';
 	my %latest_versions;
-	my $tmpfile = download_file($base_url, 1);
+	my @tags = ();
+
+	my $tmpfile = download_file($base_url.'/tags', 1);
 	if(! $tmpfile){
 		return %latest_versions;
 	}
 
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
-		if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/(JasperReportsIntegration|jri)\-[a-z0-9\.\-]+\.zip)/){
-			$latest_versions{$2} = $2.'@'.$1;
+		# https://github.com/daust/JasperReportsIntegration/releases/tag/v2.10.1
+		if($line =~ /\/daust\/JasperReportsIntegration\/releases\/tag\/(v[0-9\.]+)/){
+			push(@tags, $1);
 		}
 	}
 	close $fh;
+
+	foreach my $tag (@tags) {
+		my $tmpfile = download_file($base_url.'/releases/expanded_assets/'.$tag, 1);
+		if(! $tmpfile){
+			return %latest_versions;
+		}
+
+		open(my $fh, '<', $tmpfile) or die "open:$!";
+		while(my $line = <$fh>){
+			#       https://github.com/daust/JasperReportsIntegration/releases/download/v2.10.1/jri-2.10.1-jasper-6.20.0.zip
+			if($line =~ /<a\s+href="(\/daust\/JasperReportsIntegration\/releases\/download\/v([0-9\.]+)\/jri\-[0-9\.\-]+\-jasper\-[0-9\.\-]+\.zip)/){
+				$latest_versions{$2} = $2.'@'.$1;
+			}
+		}
+		close $fh;
+	}
 	return %latest_versions;
 }
 
 sub get_jasper_reports_versions(){
 	my $beta_enabled = $_[0];
 	my %jr_versions = parse_jr_versions('http://www.opal-consulting.de/downloads/free_tools/JasperReportsIntegration/');
-	my %gh_versions = parse_jr_gh_versions('https://github.com/daust/JasperReportsIntegration/releases');
+	my %gh_versions = parse_jr_gh_versions();
 
 	foreach my $v (keys %gh_versions){
 		$jr_versions{$v} = $gh_versions{$v};
@@ -535,7 +554,7 @@ sub check_jdbc_mysql_exists(){
 	my $catalina_home = get_catalina_home();
   opendir(DIR, $catalina_home.'/lib') or die $!;
   my @jars
-        = grep { /^mysql-connector-java\-[0-9\.]+\.jar$/       # pg jar
+        = grep { /^mysql-connector-j\-[0-9\.]+\.jar$/       # pg jar
       			&& -f "$catalina_home/lib/$_"  # and is a file
 	} readdir(DIR);
   closedir(DIR);
@@ -611,7 +630,7 @@ sub web_xml_add{
 
 sub install_jri_pg(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://jdbc.postgresql.org/download.html', 1);
+	my $tmpfile = download_file('https://jdbc.postgresql.org/download', 1);
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC PG page');
 	}
@@ -620,7 +639,7 @@ sub install_jri_pg(){
 	$jdbc_pg_ver = '';
 	open(my $fh, '<', $tmpfile) or die "open:$!";
 	while(my $line = <$fh>){
-		if($line =~ /<a\s+href="download\/postgresql\-([0-9\.]+)\.jar/){
+		if($line =~ /<a\s+href="\/download\/postgresql\-([0-9\.]+)\.jar/){
 			$jdbc_pg_ver = $1;
 			last;
 		}
@@ -665,7 +684,8 @@ sub install_jri_pg(){
 
 sub install_jri_mysql(){
 	#download JDBC versions page
-	my $tmpfile = download_file('https://dev.mysql.com/downloads/connector/j/', 1);
+	my $tmpfile = &transname('mysql.html');
+	exec_cmd('wget -O'.$tmpfile.' "https://dev.mysql.com/downloads/connector/j/"');
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL page');
 	}
@@ -686,15 +706,16 @@ sub install_jri_mysql(){
 	}
 
 	print "Downloading JDBC MySQL ver. ".$jdbc_mysql_ver."</br>";
-	$tmpfile = download_file('https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-'.$jdbc_mysql_ver.'.zip');
+	$tmpfile = &transname('mysql-connector-java-'.$jdbc_mysql_ver.'.zip');
+	exec_cmd('wget -O'.$tmpfile.' https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-'.$jdbc_mysql_ver.'.zip');
 	if(!$tmpfile){
 		die('Error: Failed to get JDBC MySQL zip');
 	}
 
 	my $unzip_dir = unzip_me($tmpfile);
 
-	my $jar_filepath = get_catalina_home().'/lib/mysql-connector-java-'.$jdbc_mysql_ver.'.jar';
-	&rename_file($unzip_dir.'/mysql-connector-java-'.$jdbc_mysql_ver.'/mysql-connector-java-'.$jdbc_mysql_ver.'.jar', $jar_filepath);
+	my $jar_filepath = get_catalina_home().'/lib/mysql-connector-j-'.$jdbc_mysql_ver.'.jar';
+	&rename_file($unzip_dir.'/mysql-connector-j-'.$jdbc_mysql_ver.'/mysql-connector-j-'.$jdbc_mysql_ver.'.jar', $jar_filepath);
 	print "Moving jar to ".$jar_filepath."</br>";
 
 	my $ref_str = '<Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"'."\n";
@@ -731,8 +752,7 @@ sub install_jri_mssql(){
 	while(my $line = <$fh>){
 		if($line =~ /Download Microsoft JDBC Driver ([0-9\.]+)/){
 			$jdbc_mssql_ver = $1;
-
-			if($line =~ /"(https:\/\/go\.microsoft\.com\/fwlink\/?linkid=[0-9]+)"/){
+			if($line =~ /"(https:\/\/go\.microsoft\.com\/fwlink\/\?linkid=[0-9]+)"/){
 				$jdbc_mssql_url = $1;
 				last;
 			}
@@ -756,13 +776,23 @@ sub install_jri_mssql(){
 	my %jv = get_java_version();
 	my $jdk_major = $jv{'major'};
 
-	my $sqljdbc_dir = $unzip_dir.'/sqljdbc_'.$jdbc_mssql_ver.'\\enu/';
+	my $sqljdbc_dir = $unzip_dir.'/sqljdbc_'.$jdbc_mssql_ver.'/enu/';
   opendir(DIR, $sqljdbc_dir) or die $!;
   my @jars = grep { /^mssql\-jdbc\-[0-9\.]+\.jre$jdk_major\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
   closedir(DIR);
 
 	if(!@jars){
-		die('Error: Failed to get JDBC MySQL jar for JDK '.$jv{'major'});
+		# take all jars
+		opendir(DIR, $sqljdbc_dir) or die $!;
+	  @jars = grep { /^mssql\-jdbc\-[0-9\.]+\.jre[0-9]+\.jar/ && -f "$sqljdbc_dir/$_" } readdir(DIR);
+	  closedir(DIR);
+
+		if(!@jars){
+			die('Error: Failed to get JDBC MySQL jar for JDK '.$jv{'major'});
+		}else{
+			# sort in reverse to get latest jar
+			@jars = sort @jars;
+		}
 	}
 
 	my $jar_filepath = get_catalina_home().'/lib/'.$jars[0];
