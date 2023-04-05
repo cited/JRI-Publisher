@@ -25,24 +25,13 @@ CentOS 8<br>
 Ubuntu 18 LTS<br>
 Ubuntu 20 LTS
 
-# Simple Install (Ubuntu):
-
-      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_ubuntu.sh
-      chmod +x jri_ubuntu.sh
-      ./jri_ubuntu.sh
-      
-# Simple Install (CentOS):
-
-      wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/jri_centos.sh
-      chmod +x jri_centos.sh
-      ./jri_centos.sh
-
-# Advanced Install:
+# Install via Script:
 
       wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/pre-install.sh
       chmod +x pre-install.sh
       ./pre-install.sh
-
+      
+Go to Servers > JRI Publisher to complete installation using the wizard
 
 # Install via Git:
 
@@ -53,6 +42,8 @@ Archive module
 	$ tar -cvzf jri_publisher.wbm.gz jri_publisher/
 
 Upload from Webmin->Webmin Configuration->Webmin Modules
+
+Go to Servers > JRI Publisher to complete installation using the wizard
 
 
 # 2.7.1 Release Notes
