@@ -87,23 +87,23 @@ sub get_latest_jdk_version(){
     }
   }
 
-	my $error;
-	my $url = 'https://www.oracle.com/java/technologies/downloads/';
-	$tmpfile = &transname("javase.html");
-	&error_setup(&text('install_err3', $url));
-	&http_download("www.oracle.com", 443, "/java/technologies/downloads/", $tmpfile, \$error,
-					undef, 1, undef, 0, 0, 1);
+#	my $error;
+#	my $url = 'https://www.oracle.com/java/technologies/downloads/';
+#	$tmpfile = &transname("javase.html");
+#	&error_setup(&text('install_err3', $url));
+#	&http_download("www.oracle.com", 443, "/java/technologies/downloads/", $tmpfile, \$error,
+#					undef, 1, undef, 0, 0, 1);
 
-	open($fh, '<', $tmpfile) or die "open:$!";
-	while(my $line = <$fh>){
-		#https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
-		if($line =~ /(https:\/\/download.oracle.com\/java\/([0-9]+)\/latest\/jdk-[0-9]+_linux-x64_bin.tar.gz)/){
-		#if($line =~ /"filepath":"(https:\/\/download.oracle.com\/otn-pub\/java\/jdk\/([a-z0-9-\.+]+)\/[a-z0-9]+\/jdk-[a-z0-9-\.]+_linux-x64_bin.tar.gz)/){
-			$java_tar_gz{$2} = $1;
-			#last;
-		}
-	}
-	close $fh;
+#	open($fh, '<', $tmpfile) or die "open:$!";
+#	while(my $line = <$fh>){
+#		#https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
+#		if($line =~ /(https:\/\/download.oracle.com\/java\/([0-9]+)\/latest\/jdk-[0-9]+_linux-x64_bin.tar.gz)/){
+#		#if($line =~ /"filepath":"(https:\/\/download.oracle.com\/otn-pub\/java\/jdk\/([a-z0-9-\.+]+)\/[a-z0-9]+\/jdk-[a-z0-9-\.]+_linux-x64_bin.tar.gz)/){
+#			$java_tar_gz{$2} = $1;
+#			#last;
+#		}
+#	}
+#	close $fh;
 
 	#cache the results
 	$java_tar_gz{'updated'} = time();
