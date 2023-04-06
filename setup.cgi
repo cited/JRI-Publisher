@@ -993,6 +993,8 @@ sub setup_cleanup{
 
 
 &ui_print_header(undef, $text{'setup_title'}, "");
+print "<img src='images/wizard.png'> <span style='font-size: 24px; color: cadetblue'>&nbsp;Set Up Wizard </span>";
+print "<p>&nbsp;</p>";
 
 if($ENV{'CONTENT_TYPE'} =~ /boundary=(.*)$/) {
 	&ReadParseMime();
