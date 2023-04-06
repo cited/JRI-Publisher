@@ -199,19 +199,19 @@ function install_app(){
 	rm -f /var/www/html/index.html.save
 	
 	if [ "${REPO}" == 'apt' ]; then
-		chown -R apache:apache /var/www/html/
-	elif [ "${REPO}" == 'rpm' ]; then
 		chown -R www-data:www-data /var/www/html/
+	elif [ "${REPO}" == 'rpm' ]; then
+		chown -R apache:apache /var/www/html/
 	fi
 	
 	if [ "${REPO}" == 'apt' ]; then
 		mkdir -p /etc/webmin/authentic-theme
-		cp -r /usr/libexec/webmin/jri_publisher/app/portal/*  /etc/webmin/authentic-theme
+		cp -r /usr/share/webmin/jri_publisher/app/portal/*  /etc/webmin/authentic-theme
 	elif [ "${REPO}" == 'rpm' ]; then
 		mkdir -p /etc/webmin/authentic-theme
-		cp -r /usr/share/webmin/jri_publisher/app/portal/*  /etc/webmin/authentic-theme
+		cp -r /usr/libexec/webmin/jri_publisher/app/portal/*  /etc/webmin/authentic-theme
 	fi
-
+        echo -e "JRI Publisher is now installed. Go to Servers > JRI Publisher to complete installation"
 }
 
 function download_certbot_module(){
