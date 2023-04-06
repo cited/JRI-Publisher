@@ -39,17 +39,6 @@ EOF
 	fi
 }
 
-function install_java(){
-        if [ "${REPO}" == 'apt' ]; then
-		apt-get -y install openjdk-8-jdk openjdk-8-jre-headless
-	elif [ "${REPO}" == 'rpm' ]; then
-		dnf install -y java-1.8.0-openjdk-headless java-1.8.0-openjdk-devel
-	fi
-    
-	
-}
-
-
 function install_tomcat_archive(){
 
 	if [ ! -d /home/tomcat ]; then
@@ -274,7 +263,6 @@ function install_apache(){
 
 get_repo;
 get_deps;
-install_java;
 install_tomcat_archive;
 install_webmin;
 install_apache;
