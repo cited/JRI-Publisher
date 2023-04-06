@@ -21,9 +21,8 @@ https://jripub.davidghedini.com
 
 # Operating Systems
 CentOS 7<br>
-CentOS 8<br>
-Ubuntu 18 LTS<br>
 Ubuntu 20 LTS
+Ubuntu 22 LTS
 
 # Install via Script:
 
