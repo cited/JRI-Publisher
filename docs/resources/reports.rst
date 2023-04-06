@@ -50,8 +50,7 @@ The code then parses the _reportName parameter to create the url.
     	$data = array(
         	"_repName"=> $_GET['report_name'],
         	"_repFormat"=>"pdf",
-        	"_dataSource"=>"datasource",
-        	"_outFilename"=>"report.pdf"      
+        	"_dataSource"=>"datasource"        	     
     	);
    
     	$file = 'http://123.4.5.6:8080/JasperReportsIntegration/report?' . http_build_query($data);
@@ -62,7 +61,7 @@ The code then parses the _reportName parameter to create the url.
     	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     	header("Cache-Control: public");
     	header("Content-Description: File Transfer");
-    	header('Content-Disposition: attachment; filename="'. $data['_outFilename'] . '"');
+    	header('Content-Disposition: attachment; filename="'. $data['_repName']. ".pdf" . '"');
     	header("Content-Transfer-Encoding: binary\n");
 
     	readfile($file);
@@ -72,7 +71,11 @@ The code then parses the _reportName parameter to create the url.
 
 	<!DOCTYPE html>
 	<html>
-    		<body>
+    		<head>
+     		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+     		</head>
+             	<body style="padding:50px">		
+		<body>
         	Report Form
         	<br>
         	<form action="" method="get">
