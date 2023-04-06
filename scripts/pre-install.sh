@@ -282,4 +282,4 @@ download_jri_publisher_module;
 download_certbot_module;
 install_certbot_module;
 install_jri_publisher_module;
-install_app();
+install_app;
