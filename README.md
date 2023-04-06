@@ -45,16 +45,12 @@ Upload from Webmin->Webmin Configuration->Webmin Modules
 Go to Servers > JRI Publisher to complete installation using the wizard
 
 
-# 2.7.1 Release Notes
+# 2.10.1 Release Notes
 
-* Added one-click JDNI support for PostgreSQL, MySQL, and MSSQL.
-* Added Responsive HTML Email Templates for scheduled reports.
-* Added Security tab to fix common security issues.
-* Proxy is still configured during set up, but is no longer enabled by default.
-* Support for Ubuntu 20 LTS
-* Added contextual help links
-* Added PHP Report Example
-* Updated url links to accomodate new version (08-12-2020)
+* Updated for JaseperReportsIntegration latest releases
+* Support for Ubuntu 22 LTS
+* Fixed PostgreSQL JNDI error
+* Fixed install script
 
 # Notes
 ## CentOS
