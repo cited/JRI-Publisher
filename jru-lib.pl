@@ -319,3 +319,99 @@ sub get_all_rep_ids(){
   }
   return sort @rv;
 }
+
+sub ctx_xml_add{
+	my $ref_str = $_[0];
+
+	my $ctxxml = get_catalina_home().'/conf/context.xml';
+	my $lref = &read_file_lines($ctxxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/Context>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($ctxxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
+}
+
+sub web_xml_add{
+	my $ref_str = $_[0];
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	my $lref = &read_file_lines($webxml);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^<\/web-app>/){
+			@{$lref}[$lnum] = $ref_str."\n$line";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($webxml);
+	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
+}
+
+sub jri_add_pg_resource{
+	my ($name, $url, $user, $pass) = @_;
+	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+  $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
+  $ref_str .= 'maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"'."\n";
+  $ref_str .= 'maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"'."\n";
+	$ref_str .= 'minEvictableIdleTimeMillis="60000" testWhileIdle="true"'."\n";
+	$ref_str .= 'validationQuery="select user" maxAge="600000"'."\n";
+	$ref_str .= 'rollbackOnReturn="true"'."\n";
+	$ref_str .= 'url="'.$url.'"'."\n";
+	$ref_str .= 'username="'.$user.'"'."\n";
+	$ref_str .= 'password="'.$pass.'"'."\n";
+	$ref_str .= '/>'."\n";
+	ctx_xml_add($ref_str);
+
+	my $ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>postgreSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>".$name."</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+	web_xml_add($ref_str);
+}
+
+sub jri_add_mysql_resource{
+	my ($name, $url, $user, $pass) = @_;
+	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.mysql.jdbc.Driver"'."\n";
+	$ref_str .= 'username="'.$user.'" password="'.$pass.'"  url="'.$url.'"/>'."\n";
+	ctx_xml_add($ref_str);
+
+	$ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MySQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>".$name."</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	web_xml_add($ref_str);
+}
+
+sub jri_add_mssql_resource{
+	my ($name, $url, $user, $pass) = @_;
+	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
+	$ref_str .= 'driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"'."\n";
+	$ref_str .= 'username="'.$user.'" password="'.$pass.'"  url="'.$url.'"/>'."\n";
+	ctx_xml_add($ref_str);
+
+	$ref_str = "<resource-ref>\n";
+	$ref_str .= "<description>MSSQL Datasource example</description>\n";
+	$ref_str .= "<res-ref-name>".$name."</res-ref-name>\n";
+	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
+	$ref_str .= "<res-auth>Container</res-auth>\n";
+	$ref_str .= "</resource-ref>";
+
+	web_xml_add($ref_str);
+}

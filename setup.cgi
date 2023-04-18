@@ -592,42 +592,6 @@ sub jri_add_datasource{
 	close $fh
 }
 
-sub ctx_xml_add{
-	my $ref_str = $_[0];
-
-	my $ctxxml = get_catalina_home().'/conf/context.xml';
-	my $lref = &read_file_lines($ctxxml);
-	my $lnum = 0;
-
-	foreach my $line (@$lref) {
-		if($line =~ /^<\/Context>/){
-			@{$lref}[$lnum] = $ref_str."\n$line";
-			last;
-		}
-		$lnum++;
-	}
-	flush_file_lines($ctxxml);
-	&set_ownership_permissions('tomcat','tomcat', undef, $ctxxml);
-}
-
-sub web_xml_add{
-	my $ref_str = $_[0];
-	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
-
-	my $lref = &read_file_lines($webxml);
-	my $lnum = 0;
-
-	foreach my $line (@$lref) {
-		if($line =~ /^<\/web-app>/){
-			@{$lref}[$lnum] = $ref_str."\n$line";
-			last;
-		}
-		$lnum++;
-	}
-	flush_file_lines($webxml);
-	&set_ownership_permissions('tomcat','tomcat', undef, $webxml);
-}
-
 sub install_jri_pg(){
 	#download JDBC versions page
 	my $tmpfile = download_file('https://jdbc.postgresql.org/download', 1);
@@ -656,27 +620,7 @@ sub install_jri_pg(){
 	&rename_file($tmpfile, $jar_filepath);
 	print "Moving jar to ".$jar_filepath."</br>";
 
-	my $ref_str = '<Resource name="jdbc/postgres" auth="Container" type="javax.sql.DataSource"'."\n";
-  $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
-  $ref_str .= 'maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"'."\n";
-  $ref_str .= 'maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"'."\n";
-	$ref_str .= 'minEvictableIdleTimeMillis="60000" testWhileIdle="true"'."\n";
-	$ref_str .= 'validationQuery="select user" maxAge="600000"'."\n";
-	$ref_str .= 'rollbackOnReturn="true"'."\n";
-	$ref_str .= 'url="jdbc:postgresql://localhost:5432/xxx"'."\n";
-	$ref_str .= 'username="xxx"'."\n";
-	$ref_str .= 'password="xxx"'."\n";
-	$ref_str .= '/>'."\n";
-	ctx_xml_add($ref_str);
-
-	my $ref_str = "<resource-ref>\n";
-	$ref_str .= "<description>postgreSQL Datasource example</description>\n";
-	$ref_str .= "<res-ref-name>jdbc/postgres</res-ref-name>\n";
-	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
-	$ref_str .= "<res-auth>Container</res-auth>\n";
-	$ref_str .= "</resource-ref>";
-	web_xml_add($ref_str);
-
+	jri_add_pg_resource('jdbc/postgres', 'jdbc:postgresql://localhost:5432/xxx', 'xxx', 'xxx');
 	jri_add_datasource('postgres', 'postgres');
 
 	print "Done</br>";
@@ -718,21 +662,7 @@ sub install_jri_mysql(){
 	&rename_file($unzip_dir.'/mysql-connector-j-'.$jdbc_mysql_ver.'/mysql-connector-j-'.$jdbc_mysql_ver.'.jar', $jar_filepath);
 	print "Moving jar to ".$jar_filepath."</br>";
 
-	my $ref_str = '<Resource name="jdbc/MySQL" auth="Container" type="javax.sql.DataSource"'."\n";
-	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
-	$ref_str .= 'driverClassName="com.mysql.jdbc.Driver"'."\n";
-	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:mysql://localhost:3306/xxx"/>'."\n";
-	ctx_xml_add($ref_str);
-
-	$ref_str = "<resource-ref>\n";
-	$ref_str .= "<description>MySQL Datasource example</description>\n";
-	$ref_str .= "<res-ref-name>jdbc/MySQL</res-ref-name>\n";
-	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
-	$ref_str .= "<res-auth>Container</res-auth>\n";
-	$ref_str .= "</resource-ref>";
-
-	web_xml_add($ref_str);
-
+	jri_add_mysql_resource('jdbc/MySQL', 'jdbc:mysql://localhost:3306/xxx', 'xxx', 'xxx');
 	jri_add_datasource('MySQL', 'MySQL');
 
 	print "Done</br>";
@@ -799,21 +729,7 @@ sub install_jri_mssql(){
 	&rename_file($sqljdbc_dir.'/'.$jars[0], $jar_filepath);
 	print "Moving jar to ".$jar_filepath."</br>";
 
-	my $ref_str = '<Resource name="jdbc/MSSQL" auth="Container" type="javax.sql.DataSource"'."\n";
-	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
-	$ref_str .= 'driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"'."\n";
-	$ref_str .= 'username="xxx" password="xxx"  url="jdbc:sqlserver://localhost:1433;databaseName=xxx"/>'."\n";
-	ctx_xml_add($ref_str);
-
-	$ref_str = "<resource-ref>\n";
-	$ref_str .= "<description>MSSQL Datasource example</description>\n";
-	$ref_str .= "<res-ref-name>jdbc/MSSQL</res-ref-name>\n";
-	$ref_str .= "<res-type>javax.sql.DataSource</res-type>\n";
-	$ref_str .= "<res-auth>Container</res-auth>\n";
-	$ref_str .= "</resource-ref>";
-
-	web_xml_add($ref_str);
-
+	jri_add_mssql_resource('jdbc/MSSQL', 'jdbc:sqlserver://localhost:1433;databaseName=xxx', 'xxx', 'xxx');
 	jri_add_datasource('MSSQL', 'MSSQL');
 
 	print "Done</br>";
