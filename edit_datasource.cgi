@@ -74,6 +74,63 @@ sub jru_rm_entry{
   &flush_file_lines($prop_file);
 }
 
+sub jru_rm_resource_ctx{
+	my $name = $_[0];
+	my $ctxxml = get_catalina_home().'/conf/context.xml';
+
+
+	$lref = &read_file_lines($ctxxml);
+	my $ln=0;
+	my $sln = -1, $eln = -1;
+
+	my $pat = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource';
+	foreach my $line (@$lref){
+    if(($sln == -1) && (index($line, $pat) >= 0)){
+			$sln = $ln;
+		}elsif(($sln >= 0) and ($line =~ /\/>$/)){
+			$eln = $ln;
+			last;
+		}
+		$ln=$ln+1;
+	}
+
+	if($sln > 0 and $eln > 0){
+		# remove the section
+		for (my $i = $sln; $i <= $eln; $i++) {
+			delete @{$lref}[$i];
+		}
+	}
+  &flush_file_lines($ctxxml);
+}
+
+sub jru_rm_resource_web{
+	my $name = $_[0];
+	my $webxml = get_catalina_home().'/webapps/JasperReportsIntegration/WEB-INF/web.xml';
+
+	$lref = &read_file_lines($webxml);
+	my $ln=0;
+	my $sln = -1, $eln = -1;
+
+	my $pat = '<res-ref-name>'.$name.'</res-ref-name>';
+	foreach $line (@$lref){
+    if(($sln == -1) && (index($line, $pat) >= 0)){
+			$sln = $ln;
+		}elsif(($sln >=0) and ($line =~ /<\/resource-ref>$/)){
+			$eln = $ln;
+			last;
+		}
+		$ln=$ln+1;
+	}
+
+	if($sln > 0 and $eln > 0){
+		# remove the section
+		for (my $i = $sln - 2; $i <= $eln; $i++) {
+			delete @{$lref}[$i];
+		}
+	}
+  &flush_file_lines($webxml);
+}
+
 &ReadParse();
 &ui_print_header(undef, $text{'jru_title'}, "", "sources", 0, 0);
 
@@ -86,7 +143,8 @@ my @jru_types = ('jdbc', 'jndi');
 @opt_datasources = map { [$_, $_]} sort keys %datasources;
 
 if($in{'post_flag'} == 3){	#update
-	if(!$datasources{$in{'dsname'}}){
+	my %ds = %{$datasources{$in{'dsname'}}};
+	if(!%ds){
 		print("<b>datasource:".$in{'dsname'}."</b> doesn't exists!");
 		&ui_print_footer("", $text{'index_return'});
 		exit;
@@ -100,6 +158,16 @@ if($in{'post_flag'} == 3){	#update
 			}
 		}
 		jru_update_entry();
+
+		if($ds{'type'} == 'jndi'){
+			jru_rm_resource_ctx($ds{'name'});
+			jru_rm_resource_web($ds{'name'});
+
+							if($ds{'url'} =~ /^jdbc:postgresql/){		jri_add_pg_resource(	 $in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+				}elsif($ds{'url'} =~ 	 /^jdbc:mysql/){				jri_add_mysql_resource($in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+				}elsif($ds{'url'} =~ 	 /^jdbc:sqlserver/){		jri_add_mssql_resource($in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+			}
+		}
 	}
 
 }elsif($in{'post_flag'} == 1){	#add
@@ -117,15 +185,28 @@ if($in{'post_flag'} == 3){	#update
 			}
 		}
 		jru_add_entry();
+
+		if($in{'type'} == 'jndi'){
+							if($in{'url'} =~ /^jdbc:postgresql/){		jri_add_pg_resource(	 $in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+				}elsif($in{'url'} =~ 	 /^jdbc:mysql/){				jri_add_mysql_resource($in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+				}elsif($in{'url'} =~ 	 /^jdbc:sqlserver/){		jri_add_mssql_resource($in{'name'}, $in{'url'}, $in{'username'}, $in{'password'});
+			}
+		}
 	}
 
 }elsif($in{'post_flag'} == 2){	#remove
-	if(!$datasources{$in{'datasource'}}){
+	my %ds = %{$datasources{$in{'datasource'}}};
+	if(!%ds){
 		print("<b>datasource:".$in{'datasource'}."</b> doesn't exists!");
 		&ui_print_footer("", $text{'index_return'});
 		exit;
 	}
 	jru_rm_entry();
+
+	if($ds{'type'} == 'jndi'){
+		jru_rm_resource_ctx($ds{'name'});
+		jru_rm_resource_web($ds{'name'});
+	}
 }
 
 if($in{'post_flag'}){
