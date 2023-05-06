@@ -162,7 +162,6 @@ sub process_file_source{
 
 sub download_file{
 	my $url = $_[0];
-  my $silent = $_[1];
 
 	my ($proto, $x, $host, $path) = split('/', $url, 4);
 	my @paths = split('/', $url);
@@ -171,19 +170,17 @@ sub download_file{
 		$filename = 'index.html';
 	}
 
+	my $sslmode = $proto eq 'https:';
 	my $port = 80;
-	if($proto eq 'https'){
+	if($sslmode){
 		$port = 443;
 	}
 
 	&error_setup(&text('install_err3', $url));
 	my $tmpfile = &transname($filename);
-  if($silent){
-    &http_download($host, $port, '/'.$path, $tmpfile, \$error, undef);
-  }else{
-    $progress_callback_url = $url;
-    &http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback);
-  }
+	$progress_callback_url = $url;
+
+	&http_download($host, $port, '/'.$path, $tmpfile, \$error, \&progress_callback, $sslmode);
 
 	if($error){
 		print &html_escape($error);
