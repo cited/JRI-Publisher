@@ -41,9 +41,9 @@ EOF
 
 function download_jri_publisher_module(){
 pushd /tmp/
-	wget https://github.com/DavidGhedini/jasper-publisher/archive/master.zip
+	wget https://github.com/DavidGhedini/jri-publisher/archive/master.zip
 	unzip master.zip
-	mv jasper-publisher-master jri_publisher
+	mv jri-publisher-master jri_publisher
 	tar -czf /opt/jri_publisher.wbm.gz jri_publisher
 	rm -rf jri_publisher master.zip
 popd
@@ -59,9 +59,9 @@ function install_app(){
 	fi
 	
 	if [ "${REPO}" == 'apt' ]; then
-		chown -R apache:apache /var/www/html/
-	elif [ "${REPO}" == 'rpm' ]; then
 		chown -R www-data:www-data /var/www/html/
+	elif [ "${REPO}" == 'rpm' ]; then
+		chown -R apache:apache /var/www/html/
 	fi
 	
 	HOST_IP=$(hostname -I | cut -f1 -d' ')
