@@ -83,7 +83,7 @@ sub jru_rm_resource_ctx{
 	my $ln=0;
 	my $sln = -1, $eln = -1;
 
-	my $pat = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource';
+	my $pat = '<Resource name="jdbc/'.$name.'" auth="Container" type="javax.sql.DataSource';
 	foreach my $line (@$lref){
     if(($sln == -1) && (index($line, $pat) >= 0)){
 			$sln = $ln;
