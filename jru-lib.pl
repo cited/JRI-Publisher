@@ -358,7 +358,7 @@ sub web_xml_add{
 
 sub jri_add_pg_resource{
 	my ($name, $url, $user, $pass) = @_;
-	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+	my $ref_str = '<Resource name="jdbc/'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
   $ref_str .= 'driverClassName="org.postgresql.Driver"'."\n";
   $ref_str .= 'maxTotal="20" initialSize="0" minIdle="0" maxIdle="8"'."\n";
   $ref_str .= 'maxWaitMillis="10000" timeBetweenEvictionRunsMillis="30000"'."\n";
@@ -382,7 +382,7 @@ sub jri_add_pg_resource{
 
 sub jri_add_mysql_resource{
 	my ($name, $url, $user, $pass) = @_;
-	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+	my $ref_str = '<Resource name="jdbc/'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
 	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
 	$ref_str .= 'driverClassName="com.mysql.jdbc.Driver"'."\n";
 	$ref_str .= 'username="'.$user.'" password="'.$pass.'"  url="'.$url.'"/>'."\n";
@@ -400,7 +400,7 @@ sub jri_add_mysql_resource{
 
 sub jri_add_mssql_resource{
 	my ($name, $url, $user, $pass) = @_;
-	my $ref_str = '<Resource name="'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
+	my $ref_str = '<Resource name="jdbc/'.$name.'" auth="Container" type="javax.sql.DataSource"'."\n";
 	$ref_str .= 'maxTotal="100" maxIdle="30" maxWaitMillis="10000"'."\n";
 	$ref_str .= 'driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"'."\n";
 	$ref_str .= 'username="'.$user.'" password="'.$pass.'"  url="'.$url.'"/>'."\n";
