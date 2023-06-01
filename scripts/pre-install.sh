@@ -144,7 +144,6 @@ function install_apache(){
 
 get_repo;
 get_deps;
-install_tomcat_archive;
 install_webmin;
 install_apache;
 download_jri_publisher_module;
