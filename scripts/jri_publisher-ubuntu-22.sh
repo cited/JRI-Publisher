@@ -529,7 +529,7 @@ function install_deps(){
 
 	export DEBIAN_FRONTEND=noninteractive
 	apt-add-repository -y universe
-
+	apt-get -y update
 	apt-get -y install wget unzip tar apache2 bzip2 rename php libapache2-mod-php php-pgsql haveged mutt zip postfix
 	
 	# Get Tomcat 9 latest version and set CATALINA_HOME
