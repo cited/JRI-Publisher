@@ -650,8 +650,8 @@ menu;
 
 declare -x STEPS=(
   'Checking Requirements...'
-	'Installing Webmin...'
   'Installing Demo Data....'
+	'Installing Webmin...'
 	'Installing Libraries....'
 	'Installing LeafletJS Apps...'
 	'Installing PostgreSQL Repository....'
@@ -667,8 +667,8 @@ declare -x STEPS=(
 )
 declare -x CMDS=(
 	'install_deps'
-	'install_webmin'
 	'install_bootstrap_app'
+	'install_webmin'
 	'install_openlayers'
 	'install_leafletjs'
 	'install_postgresql'
