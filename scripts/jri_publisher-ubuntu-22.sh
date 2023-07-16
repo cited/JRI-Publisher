@@ -316,9 +316,11 @@ function install_jri_war(){
   JASPER_HOME="${CATALINA_HOME}/jasper_reports"
 	mkdir -p "${JASPER_HOME}"
 
-  JRI_URL_PATH=$(wget -O- https://github.com/daust/JasperReportsIntegration/releases/latest | sed -n 's|.*\(/daust/JasperReportsIntegration/releases/download/.*\.zip\).*|\1|p')
+  JRI_LATEST=$(wget -O- https://github.com/daust/JasperReportsIntegration/tags | sed -n 's|.*/daust/JasperReportsIntegration/releases/tag/\(v[0-9\.]\+\).*|\1|p' | head -n 1)
+	JRI_RELEASE=$(wget -O- https://github.com/daust/JasperReportsIntegration/releases/expanded_assets/${JRI_LATEST} | sed -n "s|.*\(/jri\-${JRI_LATEST:1}\-jasper\-[0-9\.\-]\+\.zip\).*|\1|p" | head -n 1)
+	JRI_URL_PATH="https://github.com/daust/JasperReportsIntegration/releases/download/${JRI_LATEST}${JRI_RELEASE}"
 
-  wget --no-check-certificate -P/tmp "https://github.com/${JRI_URL_PATH}"
+  wget --no-check-certificate -P/tmp "${JRI_URL_PATH}"
   JRI_ARCHIVE=$(basename ${JRI_URL_PATH})
 
   unzip /tmp/${JRI_ARCHIVE}
@@ -353,7 +355,7 @@ function install_jri_war(){
 }
 
 function install_jri_pg(){
-  JRI_PG_VER=$(wget -O- https://jdbc.postgresql.org/download.html | sed -n 's/.*href="download\/postgresql\-\([0-9\.]\+\)\.jar.*/\1/p' | head -n 1)
+  JRI_PG_VER=$(wget -O- https://jdbc.postgresql.org/download | sed -n 's/.*<a href="\/download\/postgresql\-\([0-9\.]\+\)\.jar.*/\1/p' | head -n 1)
 
   wget --no-check-certificate -P/tmp "https://jdbc.postgresql.org/download/postgresql-${JRI_PG_VER}.jar"
   mv /tmp/postgresql-${JRI_PG_VER}.jar ${CATALINA_HOME}/lib/
@@ -392,11 +394,11 @@ CMD_EOF
 function install_jri_mysql(){
   JRI_MYSQL_VER=$(wget -O- https://dev.mysql.com/downloads/connector/j/ | sed -n 's/.*<h1>Connector\/J\s*\([0-9\.]\+\).*/\1/p')
 
-  wget --no-check-certificate -P/tmp "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-${JRI_MYSQL_VER}.zip"
+  wget --no-check-certificate -P/tmp "https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-${JRI_MYSQL_VER}.zip"
   pushd /tmp/
-    unzip /tmp/mysql-connector-java-${JRI_MYSQL_VER}.zip
-    mv mysql-connector-java-${JRI_MYSQL_VER}/mysql-connector-java-${JRI_MYSQL_VER}.jar ${CATALINA_HOME}/lib/
-    rm -rf mysql-connector-java-${JRI_MYSQL_VER}/
+    unzip /tmp/mysql-connector-j-${JRI_MYSQL_VER}.zip
+    mv mysql-connector-j-${JRI_MYSQL_VER}/mysql-connector-j-${JRI_MYSQL_VER}.jar ${CATALINA_HOME}/lib/
+    rm -rf mysql-connector-j-${JRI_MYSQL_VER}/
   popd
 
   sed -i.save '/^<\/Context>/d' ${CATALINA_HOME}/conf/context.xml
@@ -430,7 +432,8 @@ function install_jri_mssql(){
   mkdir -p temp
   pushd temp
     unzip /tmp/mssql.zip
-    find "sqljdbc_${JRI_MSSQL_VER}\\enu/" -type f -name "mssql-jdbc-*.jre8.jar" -exec mv {} ${CATALINA_HOME}/lib/ \;
+		JAR_FILE=$(find "sqljdbc_${JRI_MSSQL_VER}/enu/" -type f -name "mssql-jdbc-*.jar" | sort -V | tail -n 1)
+    mv ${JAR_FILE} ${CATALINA_HOME}/lib/
   popd
   rm -r temp /tmp/mssql.zip
 
@@ -542,6 +545,12 @@ function install_deps(){
 	GEO_VER=$(wget http://geoserver.org/release/stable/ -O- 2>/dev/null | sed -n 's/^[ \t]\+<h1>GeoServer \(.*\)<\/h1>.*/\1/p')
 }
 
+function install_jri_script(){
+	cp /usr/share/webmin/jri_publisher/gen_jri_report.sh /usr/local/bin
+	chown root:root /usr/local/bin/gen_jri_report.sh
+	chmod +x /usr/local/bin/gen_jri_report.sh
+}
+
 function whiptail_gauge(){
   local MAX_STEPS=${#STEPS[@]}
 	let STEP_PERC=100/MAX_STEPS
@@ -581,7 +590,6 @@ declare -x STEPS=(
 	'Installing JRI PG'
 	'Installing JRI MySQL'
 	'Installing JRI MSSQL'
-	'Installing Email Template'
 	'Setting web proxy'
 )
 declare -x CMDS=(
@@ -598,7 +606,6 @@ declare -x CMDS=(
 	'install_jri_pg'
 	'install_jri_mysql'
 	'install_jri_mssql'
-	'install_email_template'
 	'setup_webapp_proxy'
 )
 
@@ -612,6 +619,9 @@ if [ ${BUILD_SSL} == 'yes' ]; then
 	STEPS+=("Provisioning SSL")
 	CMDS+=('provision_ssl')
 fi
+
+STEPS+=('Installing Email Template' 'Install JRI Script')
+CMDS+=('install_email_template' 'install_jri_script')
 
 # -------------------- #
 
