@@ -363,8 +363,8 @@ function install_bootstrap_app(){
 	wget --quiet -P/tmp https://github.com/DavidGhedini/jri-publisher/archive/refs/heads/master.zip
 	unzip /tmp/master.zip -d/tmp
 
-	cp -r /tmp/jri-publisher/app/* /var/www/html/
-	cp -r /tmp/jri-publisher/app/portal/* /etc/webmin/authentic-theme/
+	cp -r /tmp/jri-publisher-master/app/* /var/www/html/
+	cp -r /tmp/jri-publisher-master/app/portal/* /etc/webmin/authentic-theme/
 
 	rm -rf /tmp/master.zip
 	
