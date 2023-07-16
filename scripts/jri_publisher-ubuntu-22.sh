@@ -124,7 +124,7 @@ echo -e "postgres and info passwords are saved in /root/auth.txt file"
 }
 
 function install_bootstrap_app(){
-	wget --quiet -P/tmp https://github.com/DavidGhedini/jri-publisher/archive/refs/heads/master.zip
+	wget --quiet -P/tmp https://github.com/kaloyan13/jri-publisher/archive/refs/heads/master.zip
 	unzip /tmp/master.zip -d/tmp
 
 	cp -r /tmp/jri-publisher-master/app/* /var/www/html/
@@ -198,7 +198,7 @@ function install_certbot_module(){
 function install_jri_publisher_module(){
 
   pushd /opt/
-    wget --quiet https://github.com/DavidGhedini/jri-publisher/archive/master.zip
+    wget --quiet https://github.com/kaloyan13/jri-publisher/archive/master.zip
     unzip master.zip
 		mv jri-publisher-master jri_publisher
 		tar -czf /opt/jri_publisher.wbm.gz jri_publisher
