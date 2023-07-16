@@ -6,6 +6,8 @@
 # chmod +x pre-installer
 # ./pre-installer.sh
 
+HNAME=$(hostname | sed -n 1p | cut -f1 -d' ' | tr -d '\n')
+
 function get_repo(){
 	if [ -f /etc/centos-release ]; then
 		REPO='rpm'
@@ -65,7 +67,7 @@ function install_app(){
 	fi
 	
 	HOST_IP=$(hostname -I | cut -f1 -d' ')
-	sed -i.save "s/xyzIP/${HOST_IP}/g" /var/www/html/index.html
+	sed -i.save "s/xyzIP/${HNAME}/g" /var/www/html/index.html
 	rm -f /var/www/html/index.html.save
 	
 	if [ "${REPO}" == 'apt' ]; then
