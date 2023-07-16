@@ -825,6 +825,7 @@ menu;
 
 declare -x STEPS=(
   'Checking Requirements...'
+	'Installing Webmin...'
   'Installing Demo Data....'
 	'Installing Libraries....'
 	'Installing LeafletJS Apps...'
@@ -846,6 +847,7 @@ declare -x STEPS=(
 )
 declare -x CMDS=(
 	'install_deps'
+	'install_webmin'
 	'install_bootstrap_app'
 	'install_openlayers'
 	'install_leafletjs'
@@ -870,9 +872,6 @@ if [ "${GEOSERVER_WEBAPP}" == 'Yes' ]; then
 	STEPS+=("Installing Apache Tomcat...." "Configure Geoserver WAR....")
 	CMDS+=("install_tomcat" "install_geoserver")
 fi
-
-STEPS+=("Installing Webmin...")
-CMDS+=("install_webmin")
 
 
 for mod in ${WEBMIN_MODS}; do
