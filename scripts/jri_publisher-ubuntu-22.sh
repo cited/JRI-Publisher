@@ -128,7 +128,7 @@ function install_bootstrap_app(){
 	unzip /tmp/master.zip -d/tmp
 
 	cp -r /tmp/jri-publisher-master/app/* /var/www/html/
-	cp -r /tmp/jri-publisher-master/app/portal/* /etc/webmin/authentic-theme/
+	cp -r /tmp/jri-publisher-master/app/portal /var/www/html/
 
 	rm -rf /tmp/master.zip
 	
