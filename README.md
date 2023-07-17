@@ -9,10 +9,6 @@ Webmin module for installing, configuring, and managing JasperReportsIntegration
 ![JRI Publisher](docs/_static/JRI-Publisher-Landing.png)
 
 
-![JRI Publisher](docs/_static/JRI-Publisher-Main.png)
-
-
-
 # About
 
 Jasper Publisher is a Webmin module that installs, configures, and manages Tomcat, Java, and JasperReportsIntegration
@@ -54,6 +50,8 @@ Rocky Linux 9
 
 
 4. Click the Login link on the home page to log in.
+
+![JRI Publisher](docs/_static/JRI-Publisher-Main.png)
 
 # 2.10.1 Release Notes
 
