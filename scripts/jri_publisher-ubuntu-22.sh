@@ -354,6 +354,22 @@ function install_jri_war(){
   systemctl restart tomcat
 }
 
+function wait_deploy_jri_war(){
+	while [ ! -f ${CATALINA_HOME}/webapps/JasperReportsIntegration/WEB-INF/web.xml ]; do
+		sleep 1;
+	done
+}
+
+function jri_add_datasource(){
+	ds="${0}"
+	ds_name="${1}"
+	cat >> "${CATALINA_HOME}/jasper_reports/conf/application.properties" <<CAT_EOF
+[datasource:${ds}]
+type=jndi
+name=${ds_name}
+CAT_EOF
+}
+
 function install_jri_pg(){
   JRI_PG_VER=$(wget -O- https://jdbc.postgresql.org/download | sed -n 's/.*<a href="\/download\/postgresql\-\([0-9\.]\+\)\.jar.*/\1/p' | head -n 1)
 
@@ -389,6 +405,8 @@ CMD_EOF
 </resource-ref>
 </web-app>
 CMD_EOF
+
+	jri_add_datasource 'postgres' 'postgres'
 }
 
 function install_jri_mysql(){
@@ -398,7 +416,7 @@ function install_jri_mysql(){
   pushd /tmp/
     unzip /tmp/mysql-connector-j-${JRI_MYSQL_VER}.zip
     mv mysql-connector-j-${JRI_MYSQL_VER}/mysql-connector-j-${JRI_MYSQL_VER}.jar ${CATALINA_HOME}/lib/
-    rm -rf mysql-connector-j-${JRI_MYSQL_VER}/
+    rm -rf mysql-connector-j-${JRI_MYSQL_VER}/ /tmp/mysql-connector-j-${JRI_MYSQL_VER}.zip
   popd
 
   sed -i.save '/^<\/Context>/d' ${CATALINA_HOME}/conf/context.xml
@@ -420,6 +438,8 @@ CMD_EOF
 </resource-ref>
 </web-app>
 CMD_EOF
+	
+	jri_add_datasource 'MySQL' 'MySQL'
 }
 
 function install_jri_mssql(){
@@ -457,6 +477,8 @@ cat >>${CATALINA_HOME}/webapps/JasperReportsIntegration/WEB-INF/web.xml <<CMD_EO
 </resource-ref>
 </web-app>
 CMD_EOF
+	
+	jri_add_datasource 'MSSQL' 'MSSQL'
 }
 
 function install_email_template(){
@@ -587,6 +609,7 @@ declare -x STEPS=(
 	'Installing Java....'
 	'Installing Apache Tomcat....'
 	'Installing JRI WAR'
+	'Deploying JRI WAR'
 	'Installing JRI PG'
 	'Installing JRI MySQL'
 	'Installing JRI MSSQL'
@@ -603,6 +626,7 @@ declare -x CMDS=(
 	'install_java'
 	'install_tomcat'
 	'install_jri_war'
+	'wait_deploy_jri_war'
 	'install_jri_pg'
 	'install_jri_mysql'
 	'install_jri_mssql'
