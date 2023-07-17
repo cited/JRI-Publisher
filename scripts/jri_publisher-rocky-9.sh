@@ -107,6 +107,7 @@ function install_jri_publisher_module(){
 		wget --quiet https://github.com/DavidGhedini/jri-publisher/archive/master.zip
 		unzip master.zip
 		mv jri-publisher-master jri_publisher
+                rm -f jri_publisher/setup.cgi
 		tar -czf /opt/jri_publisher.wbm.gz jri_publisher
 		rm -rf jri_publisher master.zip
 
