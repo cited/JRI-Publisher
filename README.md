@@ -33,17 +33,34 @@ Rocky Linux 9
 
 # Run the Installer:
 
-      wget https://raw.githubusercontent.com/cited/jri-publisher/master/scripts/jri_publisher-installer.sh
-      chmod +x jri_publisher-installer.sh
-      ./jri_publisher-installer.sh
-      
+1. Issue below to launch the Installer
+
+
+            wget https://raw.githubusercontent.com/cited/jri-publisher/master/scripts/jri_publisher-installer.sh && chmod +x jri_publisher-installer.sh && ./jri_publisher-installer.sh
+
+
+3. Follow the prompts to install
+
+![JRI Publisher](docs/_static/JRI-Installer.png) 
+
+3. Upon completetion, below will be displayed::
+
+        Version: JRI Publisher Full Installation
+        Control Panel Modules: jri_publisher certbot
+        Tomcat Version: 9
+        Java Version: OpenJDK
+            Installation is now completed.
+            SSL Provisioning Success.
+
+
+4. Click the Login link on the home page to log in.
 
 # 2.10.1 Release Notes
 
 * Updated for JaseperReportsIntegration latest releases
-* Support for Ubuntu 22 LTS
+* Support for Ubuntu 22 LTS and Rocky Linux 9
 * Fixed PostgreSQL JNDI error
-* Fixed install script
+* Added GUI Installer
 
 # Notes
 ## Rocky Linux
