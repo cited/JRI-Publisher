@@ -67,22 +67,6 @@ EOF
 	cp -r /var/www/html/portal/*  /etc/webmin/authentic-theme
 }
 
-function install_postgis_module(){
-
-  pushd /opt/
-		wget --quiet https://github.com/AcuGIS/PostGIS-Module/archive/master.zip
-		unzip master.zip
-		mv PostGIS-Module-master postgis
-		rm -f postgis/setup.cgi
-		tar -czf /opt/postgis.wbm.gz postgis
-		rm -rf postgis master.zip
-
-    /usr/libexec/webmin/install-module.pl postgis.wbm.gz
-		rm -rf postgis.wbm.gz
-  popd
-
-}
-
 function install_certbot_module(){
 
 	dnf install -y python3-certbot-apache certbot mod_ssl
