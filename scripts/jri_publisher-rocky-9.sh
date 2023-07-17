@@ -12,109 +12,9 @@ JAVA_FLAVOR='OpenJDK'
 
 HNAME=$(hostname | sed -n 1p | cut -f1 -d' ' | tr -d '\n')
 
-#Set postgresql version and password (random)
-
-PG_VER='15'
-PG_PASS=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32);
-
 BUILD_SSL='no'
 
 #Create certificate for use by postgres
-
-function make_cert_key(){
-  name=$1
-
-  SSL_PASS=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32);
-  if [ $(grep -m 1 -c "ssl ${name} pass" /root/auth.txt) -eq 0 ]; then
-    echo "ssl ${name} pass: ${SSL_PASS}" >> /root/auth.txt
-  else
-    sed -i.save "s/ssl ${name} pass:.*/ssl ${name} pass: ${SSL_PASS}/" /root/auth.txt
-  fi
-  openssl genrsa -des3 -passout pass:${SSL_PASS} -out ${name}.key 2048
-  openssl rsa -in ${name}.key -passin pass:${SSL_PASS} -out ${name}.key
-
-  chmod 400 ${name}.key
-
-  openssl req -new -key ${name}.key -days 3650 -out ${name}.crt -passin pass:${SSL_PASS} -x509 -subj "/C=CA/ST=Frankfurt/L=Frankfurt/O=${HNAME}/CN=${HNAME}/emailAddress=info@acugis.com"
-}
-
-
-function disable_pg_versions(){
-	# disable other PG versions repos
-	dnf config-manager --set-disabled pgdg*
-	dnf config-manager --set-enabled pgdg${PG_VER} pgdg-common
-}
-
-#Install PostgreSQL
-function install_postgresql(){
-	#1. Install PostgreSQL repo
-	PG_V2=$(echo ${PG_VER} | sed 's/\.//')
-	if [ ! -f /etc/yum.repos.d/pgdg-redhat-all.repo ]; then
-		rpm -ivh https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-	fi
-
-	#2. Disable CentOS repo for PostgreSQL
-	if [ $(grep -m 1 -c 'exclude=postgresql' /etc/yum.repos.d/CentOS-Base.repo) -eq 0 ]; then
-		sed -i.save '/\[base\]/a\exclude=postgresql*' /etc/yum.repos.d/CentOS-Base.repo
-		sed -i.save '/\[updates\]/a\exclude=postgresql*' /etc/yum.repos.d/CentOS-Base.repo
-	fi
-
-	#3. Install PostgreSQL
-	# postgresql${PG_V2}-devel*
-	dnf install -y postgresql${PG_V2} postgresql${PG_VER}-devel postgresql${PG_V2}-server postgresql${PG_V2}-libs postgresql${PG_V2}-contrib postgresql${PG_V2}-plperl postgresql${PG_V2}-plpython3 postgresql${PG_V2}-pltcl postgresql${PG_V2}-odbc
-
-	export PGDATA='/var/lib/pgsql/${PG_VER}/data'
-	export PATH="${PATH}:/usr/pgsql-${PG_VER}/bin/"
-	if [ $(grep -m 1 -c '/usr/pgsql-${PG_VER}/bin/' /etc/environment) -eq 0 ]; then
-		echo "PATH=${PATH}" >> /etc/environment
-	fi
-
-	if [ $(grep -m 1 -c 'PGDATA' /etc/environment) -eq 0 ]; then
-		echo "PGDATA=${PGDATA}" >> /etc/environment
-	fi
-
-	if [ ! -f /var/lib/pgsql/${PG_VER}/data/pg_hba.conf ]; then
-		sudo -u postgres /usr/pgsql-${PG_VER}/bin/initdb -D /var/lib/pgsql/${PG_VER}/data
-	fi
-
-	systemctl start postgresql-${PG_VER}
-
-	#5. Set postgres Password
-	if [ $(grep -m 1 -c 'pg pass' /root/auth.txt) -eq 0 ]; then
-		sudo -u postgres psql 2>/dev/null -c "alter user postgres with password '${PG_PASS}'"
-		echo "pg pass: ${PG_PASS}" > /root/auth.txt
-	fi
-
-	#6. Configure ph_hba.conf
-	cat >/var/lib/pgsql/${PG_VER}/data/pg_hba.conf <<CMD_EOF
-local	all all 							trust
-host	all all 127.0.0.1	255.255.255.255	scram-sha-256
-host	all all 0.0.0.0/0					scram-sha-256
-host	all all ::1/128						scram-sha-256
-hostssl all all 127.0.0.1	255.255.255.255	scram-sha-256
-hostssl all all 0.0.0.0/0					scram-sha-256
-hostssl all all ::1/128						scram-sha-256
-CMD_EOF
-	sed -i.save "s/.*listen_addresses.*/listen_addresses = '*'/" /var/lib/pgsql/${PG_VER}/data/postgresql.conf
-	sed -i.save "s/.*ssl =.*/ssl = on/" /var/lib/pgsql/${PG_VER}/data/postgresql.conf
-
-	#10. Create Symlinks for Backward Compatibility from PostgreSQL 9 to PostgreSQL 8
-	ln -sf /usr/pgsql-${PG_VER}/bin/pg_config /usr/bin
-	ln -sf /var/lib/pgsql/${PG_VER}/data /var/lib/pgsql
-	ln -sf /var/lib/pgsql/${PG_VER}/backups /var/lib/pgsql
-
-	#create SSL certificates
-	if [ ! -f /var/lib/pgsql/${PG_VER}/data/server.key -o ! -f /var/lib/pgsql/${PG_VER}/data/server.crt ]; then
-		make_cert_key 'server'
-    chown postgres.postgres server.key server.crt
-		mv server.key server.crt /var/lib/pgsql/${PG_VER}/data
-	fi
-
-	systemctl restart postgresql-${PG_VER}
-	systemctl enable postgresql-${PG_VER}
-	
-	disable_pg_versions
-}
 
 function info_for_user()
 
@@ -146,42 +46,6 @@ function install_bootstrap_app(){
 	#update app
 	find /var/www/html/ -type f -not -path "/var/www/html/latest/*" -name "*.html" -exec sed -i.save "s/MYLOCALHOST/${HNAME}/g" {} \;
 }
-
-function install_openlayers(){
-  OL_VER=$(wget -q -L -O- https://github.com/openlayers/openlayers/releases/latest | grep '<title>Release' | sed 's/.*v\([0-9\.]\+\).*/\1/')
-  wget --quiet -P/tmp "https://github.com/openlayers/openlayers/releases/download/v${OL_VER}/v${OL_VER}-package.zip"
-
-	mkdir /var/www/html/OpenLayers
-	pushd /var/www/html/OpenLayers
-	  unzip -u /tmp/v${OL_VER}-package.zip
-	popd
-	rm -f /tmp/v${OL_VER}-package.zip
-
-  chown -R apache:apache /var/www/html/OpenLayers
-}
-
-function install_leafletjs(){
-  LL_VER=$(wget -q -O- 'https://leafletjs.com/download.html' | sed -n 's/.*\/leaflet\/v\([0-9\.]\+\)\/leaflet\.zip.*/\1/p' | sort -rn | head -1)
-
-  wget --quiet -P/tmp "https://leafletjs-cdn.s3.amazonaws.com/content/leaflet/v${LL_VER}/leaflet.zip"
-
-  unzip /tmp/leaflet.zip -d /var/www/html/leafletjs
-  rm -f /tmp/leaflet.zip
-  chown -R apache:apache /var/www/html/leafletjs
-  
-  dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm 
-  dnf module enable php:remi-8.1 -y
-  dnf install php-{common,gmp,fpm,curl,intl,pdo,mbstring,gd,xml,cli,zip,pgsql} -y
-}
-
-function install_postgis_pkgs(){
-  dnf install -y postgis33_${PG_VER} postgis33_${PG_VER}-client pgrouting_${PG_VER}
-	
-	#osm2pg{sql,routing} are not available in Rocky Linux
-	dnf install -y cmake make gcc-c++ boost-devel expat-devel zlib-devel \
-  	bzip2-devel proj-devel lua-devel libpq-devel libpqxx-devel
-}
-
 
 function install_webmin(){
 	wget -P/tmp 'https://download.webmin.com/developers-key.asc'
@@ -243,7 +107,6 @@ function install_jri_publisher_module(){
 		wget --quiet https://github.com/DavidGhedini/jri-publisher/archive/master.zip
 		unzip master.zip
 		mv jri-publisher-master jri_publisher
-                rm -f jri_publisher/setup.cgi
 		tar -czf /opt/jri_publisher.wbm.gz jri_publisher
 		rm -rf jri_publisher master.zip
 
@@ -600,7 +463,6 @@ function menu(){
 function install_deps(){
 	touch /root/auth.txt
 	
-	dnf module disable -y postgresql
 	dnf config-manager --enable crb		# PowerTools
 	dnf install -y epel-release
 	dnf install -y wget unzip tar httpd bzip2 epel-release policycoreutils-python-utils haveged mutt zip postfix
@@ -683,10 +545,6 @@ declare -x STEPS=(
   'Checking Requirements...'
   'Installing Demo Data....'
 	'Installing Webmin...'
-	'Installing Libraries....'
-	'Installing LeafletJS Apps...'
-	'Installing PostgreSQL Repository....'
-	'Installing PostGIS Packages....'
 	'Installing Java....'
 	'Installing Apache Tomcat....'
 	'Installing JRI WAR'
@@ -700,10 +558,6 @@ declare -x CMDS=(
 	'install_deps'
 	'install_bootstrap_app'
 	'install_webmin'
-	'install_openlayers'
-	'install_leafletjs'
-	'install_postgresql'
-	'install_postgis_pkgs'	
 	'install_java'
 	'install_tomcat'
 	'install_jri_war'

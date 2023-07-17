@@ -44,7 +44,7 @@ There are two ways to start/stop/restart Tomcat.
 .. code-block:: console
    :linenos:
 
-    /etc/init.d/tomcat { start | stop | restart | status }
+    systemctl { start | stop | restart | status } tomcat
 
 
 Init Script
