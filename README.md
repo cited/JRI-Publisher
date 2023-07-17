@@ -1,6 +1,6 @@
 # Jasper Publisher
 
-[![Documentation Status](https://readthedocs.org/projects/jri-publisher/badge/?version=latest)](https://jripub.davidghedini.com/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/jri-publisher/badge/?version=latest)](https://jri-publisher.citedcorp.com/en/latest/?badge=latest)
 
 Webmin module for installing, configuring, and managing JasperReportsIntegration.
 
