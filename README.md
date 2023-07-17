@@ -19,7 +19,7 @@ It can be used with Oracle (with or without Oracle APEX), PostgreSQL, MySQL, and
 
 # Docs
 
-https://jripub.davidghedini.com
+https://jri-publisher.citedcorp.com
 
 # Operating Systems
 
