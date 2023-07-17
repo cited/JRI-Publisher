@@ -4,7 +4,13 @@
 
 Webmin module for installing, configuring, and managing JasperReportsIntegration.
 
+
+
+![JRI Publisher](docs/_static/JRI-Publisher-Landing.png)
+
+
 ![JRI Publisher](docs/_static/JRI-Publisher-Main.png)
+
 
 
 # About
