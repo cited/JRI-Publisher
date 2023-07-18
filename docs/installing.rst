@@ -2,13 +2,14 @@
 Installation
 ************
 
-Installation can be done using the pre-installer.sh script or via GIT.
+Installation is done via the GUI Installer
 
 Using the Installer
 =======================
 
 1. Issue below to launch the Installer
 
+.. code-block:: console
 
             wget https://raw.githubusercontent.com/cited/jri-publisher/master/scripts/jri_publisher-installer.sh && chmod +x jri_publisher-installer.sh && ./jri_publisher-installer.sh
 
@@ -17,14 +18,16 @@ Using the Installer
 
 .. image:: _static/JRI-Installer.png
 
-3. Upon completetion, below will be displayed::
+3. Upon completetion, below will be displayed
+
+.. code-block:: console
 
         Version: JRI Publisher Full Installation
         Control Panel Modules: jri_publisher certbot
         Tomcat Version: 9
         Java Version: OpenJDK
-            Installation is now completed.
-            SSL Provisioning Success.
+        Installation is now completed.
+        SSL Provisioning Success.
 
 
 4. Click the Login link on the home page to log in.
