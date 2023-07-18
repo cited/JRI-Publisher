@@ -4,36 +4,32 @@ Installation
 
 Installation can be done using the pre-installer.sh script or via GIT.
 
-Using the Pre-Installer
+Using the Installer
 =======================
 
-On a fresh CentOS 8 or Ubuntu 18 or 20 installation, the fastest method is to use the pre-installer script:
-
-.. code-block:: console
-   :linenos:
-   
-    wget https://raw.githubusercontent.com/DavidGhedini/jri-publisher/master/scripts/pre-install.sh
-    
-    chmod +x pre-install.sh
-
-    ./pre-install.sh
-    
-The above will install Webmin, Apache HTTPD Server, JRI Publisher module, as well as our (optional) Certbot Module for SSL.
-
-When the script completes, you will see the message below:
-
-.. code-block:: console
-   :linenos:
-
-    /opt ~
-    Installed CertBot in /usr/share/webmin/certbot (336 kb)
-    ~
-    JRI Publisher is now installed. Go to Servers > JRI Publisher to complete installation
+1. Issue below to launch the Installer
 
 
-.. note::
-    Following above, you will need to log in to Webmin to complete installation using the install :ref:`wizard-label`.
+            wget https://raw.githubusercontent.com/cited/jri-publisher/master/scripts/jri_publisher-installer.sh && chmod +x jri_publisher-installer.sh && ./jri_publisher-installer.sh
 
+
+2. Follow the prompts to install
+
+.. image:: _static/JRI-Installer.png
+
+3. Upon completetion, below will be displayed::
+
+        Version: JRI Publisher Full Installation
+        Control Panel Modules: jri_publisher certbot
+        Tomcat Version: 9
+        Java Version: OpenJDK
+            Installation is now completed.
+            SSL Provisioning Success.
+
+
+4. Click the Login link on the home page to log in.
+
+.. image:: _static/JRI-Publisher-Main.png
 
 
 Via Git or Download
