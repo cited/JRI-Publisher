@@ -141,7 +141,7 @@ sub load_custom_schedules{
       my @tokens = split(/ /, $line, 9);
       $schid = $tokens[7];
       $cron_per = join(' ', @tokens[0..4]);
-      if(scalar(@tokens) == 9 && $tokens[9] == 'nomail'){
+      if(scalar(@tokens) == 9 && $tokens[8] == 'nomail'){
         $opt_nomail = 1;
       }
 
@@ -150,7 +150,7 @@ sub load_custom_schedules{
       my @tokens = split(/ /, $line, 3);
       $schid = $tokens[1];
       $cron_per = '@'.$label;
-      if(scalar(@tokens) == 3 && $tokens[3] == 'nomail'){
+      if(scalar(@tokens) == 3 && $tokens[2] == 'nomail'){
         $opt_nomail = 1;
       }
     }

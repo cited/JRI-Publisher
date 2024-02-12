@@ -542,6 +542,20 @@ sub install_jasper_reports(){
 	open(my $fh, '>>', $catalina_home.'/bin/setenv.sh') or die "open:$!";
 	print $fh "\nOC_JASPER_CONFIG_HOME=\"${jasper_home}\"";
 	close $fh;
+	
+	# update reportsPath
+	my $app_prop = $jasper_home.'/conf/application.properties';
+	my $lref = &read_file_lines($app_prop);
+	my $lnum = 0;
+
+	foreach my $line (@$lref) {
+		if($line =~ /^[# ]*reportsPath=/){
+			@{$lref}[$lnum] = "reportsPath=${jasper_home}/reports";
+			last;
+		}
+		$lnum++;
+	}
+	flush_file_lines($app_prop);
 
 	tomcat_service_ctl('restart');
 
