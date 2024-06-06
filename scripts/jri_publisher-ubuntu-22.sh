@@ -102,7 +102,7 @@ function install_tomcat(){
 
 	if [ ! -d apache-tomcat-${TOMCAT_VER} ]; then
 		if [ ! -f /tmp/apache-tomcat-${TOMCAT_VER}.tar.gz ]; then
-			wget -P/tmp http://www.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz
+			wget -q -P/tmp "https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VER}/bin/apache-tomcat-${TOMCAT_VER}.tar.gz"
 		fi
 		tar xzf /tmp/apache-tomcat-${TOMCAT_VER}.tar.gz
 		chown -R tomcat:tomcat apache-tomcat-${TOMCAT_VER}
@@ -439,8 +439,8 @@ function install_deps(){
 	apt-get -y update
 	apt-get -y install wget unzip tar apache2 bzip2 rename php libapache2-mod-php php-pgsql haveged mutt zip postfix
 	
-	# Get Tomcat 9 latest version and set CATALINA_HOME
-	TOMCAT_VER=$(wget -qO- --no-check-certificate https://tomcat.apache.org/download-${TOMCAT_MAJOR:0:1}0.cgi | grep "<a href=\"#${TOMCAT_MAJOR}." | cut -f2 -d'>' | cut -f1 -d'<' | head -n 1)
+	# Get Tomcat latest version and set CATALINA_HOME
+	TOMCAT_VER=$(wget -q -O- --no-check-certificate https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR}/ | sed -n "s|.*<a href=\"v\(${TOMCAT_MAJOR}\.[0-9.]\+\)/\">v.*|\1|p" | sort -V | tail -n 1)
 	if [ -z "${TOMCAT_VER}" ]; then
 		echo "Error: Failed to get tomcat version"; exit 1;
 	fi
